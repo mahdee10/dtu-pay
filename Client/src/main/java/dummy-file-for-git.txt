@@ -1,0 +1,2 @@
+This is a dummy file for git, so that git does not remove the empty directory.
+The file can be removed once this directory is not empty anymore.
