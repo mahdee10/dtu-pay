@@ -6,11 +6,14 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import models.dtos.UserRequestDto;
 import services.BankServiceImplementation;
+import services.CustomerService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CustomerRegistration {
     User userCustomer;
@@ -19,6 +22,7 @@ public class CustomerRegistration {
     BankServiceImplementation bankService = new BankServiceImplementation();
 
     private static List<String> createdAccountIds = new ArrayList<>();
+    CustomerService customerService = new CustomerService();
 
 
     @io.cucumber.java.After
@@ -65,6 +69,7 @@ public class CustomerRegistration {
         payloadUser.setCpr(userCustomer.getCprNumber());
         payloadUser.setBankAccountNumber(accountId);
 
-//        customerId = customerService.createCustomer(payloadUser);
+        customerId = customerService.createCustomer(payloadUser);
+        assertNotNull(customerId, "Customer ID should not be null");
     }
 }

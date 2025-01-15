@@ -28,6 +28,8 @@ public class CustomerService {
                         customerDto.getBankAccountId());
         customerRepository.addCustomer(customer);
 
+        System.out.println("I created "+customer.getFirstName());
+
         Event event = new Event("CustomerCreated", new Object[] { customer.getId() });
         queue.publish(event);
     }
