@@ -4,15 +4,18 @@ import dtu.ws.fastmoney.User;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import models.dtos.UserRequestDto;
 import services.BankServiceImplementation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomerRegistration {
     User userCustomer;
     private String accountId;
+    private UUID customerId;
     BankServiceImplementation bankService = new BankServiceImplementation();
 
     private static List<String> createdAccountIds = new ArrayList<>();
@@ -52,5 +55,16 @@ public class CustomerRegistration {
                 new BigDecimal(balance)
         );
         registerAccount(accountId);
+    }
+
+    @Then("the customer is registered with Simple DTU Pay using their bank account")
+    public void the_customer_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+        UserRequestDto payloadUser = new UserRequestDto();
+        payloadUser.setFirstName(userCustomer.getFirstName());
+        payloadUser.setLastName(userCustomer.getLastName());
+        payloadUser.setCpr(userCustomer.getCprNumber());
+        payloadUser.setBankAccountNumber(accountId);
+
+//        customerId = customerService.createCustomer(payloadUser);
     }
 }
