@@ -4,11 +4,16 @@ import dtu.ws.fastmoney.User;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import models.dtos.UserRequestDto;
 import services.BankServiceImplementation;
+import services.MerchantService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MerchantRegistration {
     User userMerchant;
@@ -16,6 +21,9 @@ public class MerchantRegistration {
     BankServiceImplementation bankService = new BankServiceImplementation();
 
     private static List<String> createdAccountIds = new ArrayList<>();
+    private MerchantService merchantService =new MerchantService();
+    private UUID merchantId;
+
 
 
     @io.cucumber.java.After
@@ -52,5 +60,16 @@ public class MerchantRegistration {
                 new BigDecimal(balance)
         );
         registerAccount(accountId);
+    }
+    @Then("the merchant is registered with Simple DTU Pay using their bank account")
+    public void the_merchant_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+        UserRequestDto payloadUser = new UserRequestDto();
+        payloadUser.setFirstName(userMerchant.getFirstName());
+        payloadUser.setLastName(userMerchant.getLastName());
+        payloadUser.setCpr(userMerchant.getCprNumber());
+        payloadUser.setBankAccountNumber(accountId);
+
+        merchantId = merchantService.createMerchant(payloadUser);
+        assertNotNull(merchantId, "merchant ID should not be null");
     }
 }

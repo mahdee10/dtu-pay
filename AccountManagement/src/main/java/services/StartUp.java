@@ -13,5 +13,6 @@ public class StartUp {
         System.out.println("startup");
         var mq = new RabbitMqQueue("rabbitMq");
         new CustomerService(mq);
+        new MerchantService(mq);
     }
 }
