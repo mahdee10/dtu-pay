@@ -30,4 +30,13 @@ public class CustomerRepository {
     public Customer getCustomer(UUID id) {
         return customers.get(id);
     }
+
+    public boolean removeCustomer(UUID id) {
+        if (customers.containsKey(id)) {
+            System.out.println("found");
+            customers.remove(id);
+            return true;
+        }
+        return false;
+    }
 }

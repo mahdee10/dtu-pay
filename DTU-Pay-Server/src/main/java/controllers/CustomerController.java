@@ -34,9 +34,9 @@ public class CustomerController {
     }
 
     @DELETE
-    @Path("/{id}")
+    @Path("/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteCustomer(@PathParam("id") UUID id) {
+    public Response deleteCustomer(@PathParam("customerId") UUID id) {
         System.out.println("Attempting to delete customer with ID: " + id);
         try {
             boolean isDeleted = service.deregisterCustomer(id);

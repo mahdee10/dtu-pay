@@ -15,7 +15,7 @@ public class CustomerService {
     public CustomerService(MessageQueue q) {
         queue = q;
         queue.addHandler("CustomerCreated", this::handleCustomerCreated);
-        queue.addHandler("DeregisteredCustomer", this::handleDeregisteredCustomer);
+        queue.addHandler("CustomerDeregistered", this::handleDeregisteredCustomer);
     }
 
     public UUID createCustomer(CreateCustomerDto customer) {
@@ -32,13 +32,18 @@ public class CustomerService {
 
     public boolean deregisterCustomer(UUID customerId) {
         deregisteredCustomer = new CompletableFuture<>();
-        Event event = new Event("DeregisterCustomerRequested", new Object[] { customerId });
+        Event event = new Event("CustomerDeregistrationRequested", new Object[] { customerId });
         queue.publish(event);
-        return deregisteredCustomer.join();
+        boolean b=deregisteredCustomer.join();
+        System.out.println(b);
+        return b;
     }
 
     public void handleDeregisteredCustomer(Event e) {
-        Boolean isDeregistered = e.getArgument(0, Boolean.class);
+        System.out.println("I am deleting now");
+        System.out.println(e);
+
+        Boolean isDeregistered = e.getArgument(1, Boolean.class);
         deregisteredCustomer.complete(isDeregistered);
     }
 }
