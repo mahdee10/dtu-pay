@@ -5,7 +5,7 @@ Feature: Requesting tokens
      Given a registered customer with id "123" with more than 1 active token
      When a registered customer with id "123" requests tokens
      Then an event "RequestTokensEvent" is sent
-     When an event "RequestTokensResponse" is sent
+     When a response event "RequestTokensResponse" is sent
      Then the response is unsuccessful
      And the request is denied
      
@@ -13,7 +13,7 @@ Feature: Requesting tokens
      Given a registered customer with id "123" with 1 or less active tokens
      When a registered customer with id "123" requests less than 5 tokens
      Then an event "RequestTokensEvent" is sent
-     When an event "RequestTokensResponse"is sent
+     When a response event "RequestTokensResponse"is sent
      Then the response is successful
      And the service will grant 3 active tokens to user
   
@@ -21,7 +21,7 @@ Feature: Requesting tokens
      Given a registered customer with id "123" with 1 or less active tokens
      When a registered customer with id "123" requests more than 5 tokens
      Then an event "RequestTokensEvent" is sent
-     When an event "RequestTokensResponse" is sent
+     When a response event "RequestTokensResponse" is sent
      Then response is unsuccessful
      And the request is denied
      
