@@ -40,9 +40,16 @@ public class TokenService {
     }
 
     public void handleCustomerTokenRequest(Event e) {
-        //logic
-        Event event = new Event("CustomerTokensReturned", new Object[] {});
-        queue.publish(event);
+    	 UUID uuid = e.getArgument(0, UUID.class);
+    	 Token token = tokenRepository.getTokens(uuid).stream().findAny().orElse(null);
+    	 if(token == null) {
+    		 Event event = new Event("CustomerTokensReturned", new Object[] {new Exception("You have no more tokens. Request more tokens.")});
+             queue.publish(event);
+             return;
+             }
+    		 
+         Event event = new Event("CustomerTokensReturned", new Object[] {token.getUuid()});
+         queue.publish(event);
     }
 
     public void handleRequestTokensEvent(Event e) {
