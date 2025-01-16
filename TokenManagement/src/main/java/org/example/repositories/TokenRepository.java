@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 // Create Repository class with singleton
-class TokenRepository {
+public class TokenRepository {
     private static TokenRepository instance;
     private HashMap<UUID, List<Token>> validTokens;
     private HashMap<UUID, List<Token>> invalidTokens;
@@ -52,6 +52,9 @@ class TokenRepository {
 
     public void addTokens(UUID userUUID, List<Token> tokens) {
         if (validTokens.containsKey(userUUID)) {
+            validTokens.get(userUUID).addAll(tokens);
+        }
+        else {
             validTokens.put(userUUID, tokens);
         }
     }
@@ -61,5 +64,11 @@ class TokenRepository {
             return validTokens.get(userUUID);
         }
         return new ArrayList<>();
+    }
+
+    public List<Token> getAllTokens() {
+        List<Token> tokens = new ArrayList<>();
+        validTokens.forEach((key, value) -> tokens.addAll(value));
+        return tokens;
     }
 }

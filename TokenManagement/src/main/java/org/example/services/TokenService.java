@@ -2,10 +2,16 @@ package org.example.services;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import org.example.models.Token;
+import org.example.repositories.TokenRepository;
+
+import java.util.List;
+import java.util.UUID;
 
 public class TokenService {
 
     MessageQueue queue;
+    TokenRepository tokenRepository = TokenRepository.getInstance();
 
     public TokenService(MessageQueue queue) {
         this.queue = queue;
@@ -17,8 +23,19 @@ public class TokenService {
     }
 
     public void handleTokenValidationRequest(Event e) {
-        //logic
-        Event event = new Event("TokenValidationReturned", new Object[] {});
+        UUID uuid = e.getArgument(0, UUID.class);
+        boolean isValid = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(uuid) && token.isValid());
+
+        if (!isValid) {
+            boolean exists = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(uuid));
+            if (!exists) {
+                Event event = new Event("TokenValidationReturned", new Object[] {new Exception("Token not found.")});
+                queue.publish(event);
+                return;
+            }
+        }
+
+        Event event = new Event("TokenValidationReturned", new Object[] {isValid});
         queue.publish(event);
     }
 

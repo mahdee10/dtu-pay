@@ -3,23 +3,17 @@
 Feature: Token validation
 
   Scenario: A supplied active token is validated
-     Given a payment service supplies a token with id "ID" to validate
+     Given a payment service supplies a "valid" token with id "128e62be-42e7-42db-bb3a-9aab8db6e4d8" to validate
      When the event "TokenValidationRequest" is received
-     Then a response event "TokenValidationReturned" is sent
-     When a token with id "ID" exists and is active
-     Then token validation is successful with value "true"
+     Then a response event "TokenValidationReturned" is sent and contains the value "true"
 
   Scenario: A supplied inactive token is not validated
-     Given a payment service supplies a token with id "ID" to validate
+     Given a payment service supplies a "invalid" token with id "128e62be-42e7-42db-bb3a-9aab8db6e4d7" to validate
      When the event "TokenValidationRequest" is received
-     Then a response event "TokenValidationReturned" is sent
-     When a token with id "ID" exists but is inactive
-     And token validation is not successful and contains value "false"
+     Then a response event "TokenValidationReturned" is sent and contains the value "false"
      
   Scenario: A supplied non-existing token throws an exception
-     Given a payment service supplies a token with "ID" to validate
+     Given a payment service supplies a "missing" token with id "128e62be-42e7-42db-bb3a-9aab8db6e4d6" to validate
      When the event "TokenValidationRequest" is received
-     Then a response event "TokenValidationReturned" is sent
-     When a token with id "ID" does not exist
-     Then an exception is thrown with message "Token not found."
+     Then a response event "TokenValidationReturned" is sent and throws an exception "Token not found."
 

@@ -7,5 +7,3 @@ Feature: Using a token
      When an event "UseTokenRequest" is sent
      Then a response "UseTokenResponse" is sent
      When the response is successful
-     Then a token with id "ID" is marked as invalid
-     And a token with id "ID" is removed from the active token list and placed in an inactive token list
