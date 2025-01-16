@@ -17,7 +17,6 @@ public class TokensValidateSteps {
     MessageQueue queue = mock(MessageQueue.class);
     TokenService s = new TokenService(queue);
 
-
     @Given("a payment service supplies a token with id {string} to validate")
     public void a_payment_service_supplies_a_token_with_id_to_validate(String string) {
         // Write code here that turns the phrase above into concrete actions
