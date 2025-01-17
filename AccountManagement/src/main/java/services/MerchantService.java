@@ -2,6 +2,7 @@ package services;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import models.Customer;
 import models.Merchant;
 import models.dtos.MerchantDto;
 import repositories.MerchantRepository;
@@ -16,6 +17,8 @@ public class MerchantService {
         this.queue = q;
         this.queue.addHandler("MerchantRegistrationRequested", this::handleMerchantRegistrationRequested);
         this.queue.addHandler("MerchantDeregistrationRequested", this::handleMerchantDeregistrationRequested);
+        this.queue.addHandler("GetMerchanntBankAccountRequested", this::handleGetMerchantBankAccountRequested);
+        this.queue.addHandler("ValidateMerchantAccountRequested", this::handleValidateMerchantAccountRequested);
     }
 
     public void handleMerchantRegistrationRequested(Event ev) {
@@ -37,6 +40,22 @@ public class MerchantService {
         System.out.println(isDeleted);
 
         Event event = new Event("MerchantDeregistered", new Object[]{merchantId, isDeleted});
+        queue.publish(event);
+    }
+    public void handleGetMerchantBankAccountRequested(Event ev) {
+        UUID merchantId = ev.getArgument(0, UUID.class);
+        Merchant merchant = merchantRepository.getMerchant(merchantId);
+        String bankAccountId = merchant != null ? merchant.getBankAccountId() : null;
+
+        Event event = new Event("MerchantBankAccountResponse", new Object[]{merchantId, bankAccountId});
+        queue.publish(event);
+    }
+
+    public void handleValidateMerchantAccountRequested(Event ev) {
+        UUID merchantId = ev.getArgument(0, UUID.class);
+        boolean isValid = merchantRepository.getMerchant(merchantId) != null;
+
+        Event event = new Event("MerchantAccountValidationResponse", new Object[]{merchantId, isValid});
         queue.publish(event);
     }
 }
