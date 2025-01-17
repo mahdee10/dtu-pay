@@ -16,6 +16,8 @@ public class CustomerService {
         this.queue = q;
         this.queue.addHandler("CustomerRegistrationRequested", this::handleCustomerRegistrationRequested);
         this.queue.addHandler("CustomerDeregistrationRequested", this::handleCustomerDeregistrationRequested);
+        this.queue.addHandler("GetCustomerBankAccountRequested", this::handleGetCustomerBankAccountRequested);
+        this.queue.addHandler("ValidateCustomerAccountRequested", this::handleValidateCustomerAccountRequested);
     }
 
     public void handleCustomerRegistrationRequested(Event ev) {
@@ -39,6 +41,23 @@ public class CustomerService {
         System.out.println(isDeleted);
 
         Event event = new Event("CustomerDeregistered", new Object[]{customerId, isDeleted});
+        queue.publish(event);
+    }
+
+    public void handleGetCustomerBankAccountRequested(Event ev) {
+        UUID customerId = ev.getArgument(0, UUID.class);
+        Customer customer = customerRepository.getCustomer(customerId);
+        String bankAccountId = customer != null ? customer.getBankAccountId() : null;
+
+        Event event = new Event("CustomerBankAccountResponse", new Object[]{customerId, bankAccountId});
+        queue.publish(event);
+    }
+
+    public void handleValidateCustomerAccountRequested(Event ev) {
+        UUID customerId = ev.getArgument(0, UUID.class);
+        boolean isValid = customerRepository.getCustomer(customerId) != null;
+
+        Event event = new Event("CustomerAccountValidationResponse", new Object[]{customerId, isValid});
         queue.publish(event);
     }
 }
