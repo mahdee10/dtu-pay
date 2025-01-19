@@ -9,15 +9,24 @@ import repositories.CustomerRepository;
 import java.util.UUID;
 
 public class CustomerService {
+    private static final String CUSTOMER_REGISTRATION_REQUESTED = "CustomerRegistrationRequested";
+    private static final String CUSTOMER_CREATED = "CustomerCreated";
+    private static final String CUSTOMER_DEREGISTRATION_REQUESTED = "CustomerDeregistrationRequested";
+    private static final String CUSTOMER_DEREGISTERED = "CustomerDeregistered";
+    private static final String GET_CUSTOMER_BANK_ACCOUNT_REQUESTED = "GetCustomerBankAccountRequested";
+    private static final String CUSTOMER_BANK_ACCOUNT_RESPONSE = "CustomerBankAccountResponse";
+    private static final String VALIDATE_CUSTOMER_ACCOUNT_REQUESTED = "ValidateCustomerAccountRequested";
+    private static final String CUSTOMER_ACCOUNT_VALIDATION_RESPONSE = "CustomerAccountValidationResponse";
+
     MessageQueue queue;
     CustomerRepository customerRepository = CustomerRepository.getInstance();
 
     public CustomerService(MessageQueue q) {
         this.queue = q;
-        this.queue.addHandler("CustomerRegistrationRequested", this::handleCustomerRegistrationRequested);
-        this.queue.addHandler("CustomerDeregistrationRequested", this::handleCustomerDeregistrationRequested);
-        this.queue.addHandler("GetCustomerBankAccountRequested", this::handleGetCustomerBankAccountRequested);
-        this.queue.addHandler("ValidateCustomerAccountRequested", this::handleValidateCustomerAccountRequested);
+        this.queue.addHandler(CUSTOMER_REGISTRATION_REQUESTED, this::handleCustomerRegistrationRequested);
+        this.queue.addHandler(CUSTOMER_DEREGISTRATION_REQUESTED, this::handleCustomerDeregistrationRequested);
+        this.queue.addHandler(GET_CUSTOMER_BANK_ACCOUNT_REQUESTED, this::handleGetCustomerBankAccountRequested);
+        this.queue.addHandler(VALIDATE_CUSTOMER_ACCOUNT_REQUESTED, this::handleValidateCustomerAccountRequested);
     }
 
     public void handleCustomerRegistrationRequested(Event ev) {
@@ -32,15 +41,16 @@ public class CustomerService {
 
         System.out.println("I created "+customer.getFirstName());
 
-        Event event = new Event("CustomerCreated", new Object[] { customer.getId() });
+        Event event = new Event(CUSTOMER_CREATED, new Object[] { customer.getId() });
         queue.publish(event);
     }
+
     public void handleCustomerDeregistrationRequested(Event ev) {
         UUID customerId = ev.getArgument(0, UUID.class);
         boolean isDeleted = customerRepository.removeCustomer(customerId);
         System.out.println(isDeleted);
 
-        Event event = new Event("CustomerDeregistered", new Object[]{customerId, isDeleted});
+        Event event = new Event(CUSTOMER_DEREGISTERED, new Object[]{customerId, isDeleted});
         queue.publish(event);
     }
 
@@ -49,7 +59,7 @@ public class CustomerService {
         Customer customer = customerRepository.getCustomer(customerId);
         String bankAccountId = customer != null ? customer.getBankAccountId() : null;
 
-        Event event = new Event("CustomerBankAccountResponse", new Object[]{customerId, bankAccountId});
+        Event event = new Event(CUSTOMER_BANK_ACCOUNT_RESPONSE, new Object[]{customerId, bankAccountId});
         queue.publish(event);
     }
 
@@ -57,7 +67,7 @@ public class CustomerService {
         UUID customerId = ev.getArgument(0, UUID.class);
         boolean isValid = customerRepository.getCustomer(customerId) != null;
 
-        Event event = new Event("CustomerAccountValidationResponse", new Object[]{customerId, isValid});
+        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{customerId, isValid});
         queue.publish(event);
     }
 }

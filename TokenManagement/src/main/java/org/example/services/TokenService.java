@@ -10,32 +10,43 @@ import java.util.UUID;
 
 public class TokenService {
 
+    private static final String TOKEN_VALIDATION_REQUESTED = "TokenValidationRequest";
+    private static final String TOKEN_VALIDATION_RETURNED = "TokenValidationReturned";
+    private static final String CUSTOMER_TOKENS_REQUESTED = "CustomerTokensRequest";
+    private static final String CUSTOMER_TOKENS_RETURNED = "CustomerTokensReturned";
+    private static final String REQUEST_TOKENS_EVENT = "RequestTokensEvent";
+    private static final String REQUEST_TOKENS_RESONSE = "RequestTokensResponse";
+    private static final String USE_TOKEN_REQUEST = "UseTokenRequest";
+    private static final String USE_TOKEN_RESPONSE = "UseTokenResponse";
+
     MessageQueue queue;
     TokenRepository tokenRepository = TokenRepository.getInstance();
 
     public TokenService(MessageQueue queue) {
         this.queue = queue;
-        this.queue.addHandler("TokenValidationRequest", this::handleTokenValidationRequest);
-        this.queue.addHandler("CustomerTokensRequest", this::handleCustomerTokenRequest);
-        this.queue.addHandler("RequestTokensEvent", this::handleRequestTokensEvent);
-        this.queue.addHandler("UseTokenRequest", this::handleUseTokenRequest);
+        this.queue.addHandler(TOKEN_VALIDATION_REQUESTED, this::handleTokenValidationRequest);
+        this.queue.addHandler(CUSTOMER_TOKENS_REQUESTED, this::handleCustomerTokenRequest);
+        this.queue.addHandler(REQUEST_TOKENS_EVENT, this::handleRequestTokensEvent);
+        this.queue.addHandler(USE_TOKEN_REQUEST, this::handleUseTokenRequest);
 
     }
 
     public void handleTokenValidationRequest(Event e) {
         UUID uuid = e.getArgument(0, UUID.class);
-        boolean isValid = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(uuid) && token.isValid());
+        boolean isValid = tokenRepository.getAllTokens()
+                .stream()
+                .anyMatch(token -> token.getUuid().equals(uuid) && token.isValid());
 
         if (!isValid) {
             boolean exists = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(uuid));
             if (!exists) {
-                Event event = new Event("TokenValidationReturned", new Object[] {new Exception("Token not found.")});
+                Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[] {new Exception("Token not found.")});
                 queue.publish(event);
                 return;
             }
         }
 
-        Event event = new Event("TokenValidationReturned", new Object[] {isValid});
+        Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[] {isValid});
         queue.publish(event);
     }
 
@@ -43,24 +54,24 @@ public class TokenService {
     	 UUID uuid = e.getArgument(0, UUID.class);
     	 Token token = tokenRepository.getTokens(uuid).stream().findAny().orElse(null);
     	 if(token == null) {
-    		 Event event = new Event("CustomerTokensReturned", new Object[] {new Exception("You have no more tokens. Request more tokens.")});
+    		 Event event = new Event(CUSTOMER_TOKENS_RETURNED, new Object[] {new Exception("You have no more tokens. Request more tokens.")});
              queue.publish(event);
              return;
-             }
+         }
     		 
-         Event event = new Event("CustomerTokensReturned", new Object[] {token.getUuid()});
+         Event event = new Event(CUSTOMER_TOKENS_RETURNED, new Object[] {token.getUuid()});
          queue.publish(event);
     }
 
     public void handleRequestTokensEvent(Event e) {
         //logic
-        Event event = new Event("RequestTokensResponse", new Object[] {});
+        Event event = new Event(REQUEST_TOKENS_RESONSE, new Object[] {});
         queue.publish(event);
     }
 
     public void handleUseTokenRequest(Event e) {
         //logic
-        Event event = new Event("UseTokenResponse", new Object[] {});
+        Event event = new Event(USE_TOKEN_RESPONSE, new Object[] {});
         queue.publish(event);
     }
 
