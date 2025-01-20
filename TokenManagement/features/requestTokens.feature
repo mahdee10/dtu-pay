@@ -10,7 +10,7 @@ Feature: Requesting tokens
      Given an existing registered customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" with 1 or less active tokens
      When a registered customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" requests 3 tokens an event RequestTokensEvent "RequestTokensEvent" is sent
      Then a response RequestTokensResponse "RequestTokensResponse" is sent containing a list with 3 new tokens
-     And a customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" has 3 more active tokens
+     And a customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" has 4 active tokens
   
   Scenario: Customer requests more than the allowed amount of tokens
      Given an existing registered customer with id "7b137b1e-de3e-48e7-ac96-2f6e4ab7a04b" with 1 or less active tokens

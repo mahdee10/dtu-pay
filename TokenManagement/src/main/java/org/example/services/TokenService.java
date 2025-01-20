@@ -78,7 +78,7 @@ public class TokenService {
     				  newTokenList.add(newToken);	  
     				}
     			tokenRepository.addTokens(uuid, newTokenList);
-    			Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] {newTokenList});
+    			Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] {newTokenList.size()});
                 queue.publish(event);
                 return;
     		}

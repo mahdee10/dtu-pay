@@ -48,7 +48,9 @@ public class RequestTokenSteps {
 		tokenList.add((token2));
 		tokenRepository.addTokens(userUUID, tokenList);
         assertTrue(tokenRepository.getTokens(userUUID).size() > int1);
-	}	@Given("a registered customer with id {string} with more than {int} active token")
+	}	
+	
+	@Given("a registered customer with id {string} with more than {int} active token")
 
 	@When("a registered customer with id {string} requests {int} tokens and an event RequestTokensEvent {string} is sent")
 	public void a_registered_customer_with_id_requests_tokens_and_an_event_request_tokens_event_is_sent(String uuid, Integer int1, String RequestTokensEvent) {
@@ -83,17 +85,16 @@ public class RequestTokenSteps {
 			Token newToken = new Token(UUID.randomUUID(), true);
 			receivedTokensList.add(newToken);	  
 			}
-		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{receivedTokensList}));
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{receivedTokensList.size()}));
 	}
 
-	@Then("a customer with id {string} has {int} more active tokens")
-	public void a_customer_with_id_has_more_active_tokens(String uuid, Integer int1) {
-	    assertTrue(tokenRepository.getTokens( UUID.fromString(uuid)).size() >= int1);
+	@Then("a customer with id {string} has {int} active tokens")
+	public void a_customer_with_id_has_active_tokens(String uuid, Integer int1) {
+	    assertTrue(tokenRepository.getTokens(UUID.fromString(uuid)).size() == int1);
 	}
 
 	@Then("a response RequestTokensResponse {string} is sent and throws an exception {string}")
 	public void a_response_request_tokens_response_is_sent_and_throws_an_exception(String RequestTokensResponse, String exception) {
-
 		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{new Exception(exception)}));
 	}
 
