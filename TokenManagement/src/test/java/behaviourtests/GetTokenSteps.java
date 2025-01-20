@@ -50,8 +50,7 @@ public class GetTokenSteps {
 	@Then("a response CustomerTokensReturned {string} is sent and a customer receives a token")
 	public void a_response_customer_tokens_returned_is_sent_and_a_customer_receives_a_token(String CustomerTokensReturned) {
 		
-		 System.out.print(tokenUUID);
-		verify(queue).publish(new Event(CustomerTokensReturned, new Object[]{expectedUUID}));
+		 verify(queue).publish(new Event(CustomerTokensReturned, new Object[]{expectedUUID}));
 		 assertNotNull(expectedUUID);
 	}
 
