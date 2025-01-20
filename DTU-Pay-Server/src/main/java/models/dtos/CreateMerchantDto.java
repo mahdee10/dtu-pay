@@ -11,6 +11,8 @@ public class CreateMerchantDto implements Serializable {
     private String cpr;
     private String bankAccountId;
 
+    public CreateMerchantDto() {}
+
     public String getFirstName() {
         return firstName;
     }

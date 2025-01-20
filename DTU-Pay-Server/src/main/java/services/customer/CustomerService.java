@@ -7,7 +7,8 @@ import models.dtos.CreateCustomerDto;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import services.CorrelationId;
+import models.CorrelationId;
+
 public class CustomerService {
     private MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CompletableFuture<UUID>> registeredCustomerCorrelations = new ConcurrentHashMap<>();
@@ -21,7 +22,8 @@ public class CustomerService {
 
     public UUID createCustomer(CreateCustomerDto customer) {
         CorrelationId correlationId = CorrelationId.randomId();
-        registeredCustomerCorrelations.put(correlationId, new CompletableFuture<UUID>());
+        System.out.println("Customer created: " + correlationId);
+        registeredCustomerCorrelations.put(correlationId, new CompletableFuture<>());
 
         Event event = new Event("CustomerRegistrationRequested", new Object[]{correlationId, customer});
         queue.publish(event);

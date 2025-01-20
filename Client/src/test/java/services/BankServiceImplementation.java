@@ -7,25 +7,20 @@ import java.math.BigDecimal;
 
 public class BankServiceImplementation implements IBankService {
 
+    BankServiceService bankServiceService = new BankServiceService();
+    BankService bankService = bankServiceService.getBankServicePort();
+
     @Override
     public String createAccount(String firstName, String lastName, String cpr, BigDecimal initialBalance) {
         try {
-
-            BankServiceService bankServiceService = new BankServiceService();
-            BankService bankService = bankServiceService.getBankServicePort();
-
             // Create a new User object
             User user = new User();
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setCprNumber(cpr);
 
-
-            String accountId = bankService.createAccountWithBalance(user, initialBalance);
-
             // Return the account ID
-            return accountId;
-
+            return bankService.createAccountWithBalance(user, initialBalance);
         } catch (BankServiceException_Exception e) {
             // Handle exception if account creation fails
             e.printStackTrace();
@@ -35,17 +30,15 @@ public class BankServiceImplementation implements IBankService {
 
     @Override
     public Account getAccount(String accountId) throws BankServiceException_Exception {
-        BankServiceService bankServiceService = new BankServiceService();
-        BankService bankService = bankServiceService.getBankServicePort();
         return bankService.getAccount(accountId);
+    }
+
+    public Account getAccountByCPR(String Cpr) throws BankServiceException_Exception {
+        return bankService.getAccountByCprNumber(Cpr);
     }
 
     public void deleteAccount(String accountId) {
         try {
-            BankServiceService bankServiceService = new BankServiceService();
-            BankService bankService = bankServiceService.getBankServicePort();
-
-
             bankService.retireAccount(accountId);
             System.out.println("Deleted account: " + accountId);
         } catch (Exception e) {

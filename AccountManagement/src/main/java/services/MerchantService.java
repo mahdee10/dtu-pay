@@ -2,6 +2,7 @@ package services;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import models.CorrelationId;
 import models.Merchant;
 import models.dtos.MerchantDto;
 import repositories.MerchantRepository;
@@ -16,7 +17,7 @@ public class MerchantService {
     private static final String GET_Merchant_BANK_ACCOUNT_REQUESTED = "GetMerchantBankAccountRequested";
     private static final String Merchant_BANK_ACCOUNT_RESPONSE = "MerchantBankAccountResponse";
     private static final String VALIDATE_Merchant_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
-    private static final String Merchant_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
+    private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
 
     MessageQueue queue;
     MerchantRepository merchantRepository = MerchantRepository.getInstance();
@@ -71,13 +72,13 @@ public class MerchantService {
 //    }
 
     public void handleValidateMerchantAccountRequested(Event ev) {
-        CorrelationId correlationId=ev.getArgument(0, CorrelationId.class);
+        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         UUID merchantId = ev.getArgument(1, UUID.class);
         Merchant merchant = merchantRepository.getMerchant(merchantId);
         boolean isValid = merchant != null;
 
         String merchantAccountNumber = isValid ? merchant.getBankAccountId() : null;
-        Event event = new Event(Merchant_ACCOUNT_VALIDATION_RESPONSE, new Object[]{correlationId,merchantAccountNumber, isValid});
+        Event event = new Event(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, new Object[]{ correlationId, merchantAccountNumber, isValid});
         queue.publish(event);
     }
 }

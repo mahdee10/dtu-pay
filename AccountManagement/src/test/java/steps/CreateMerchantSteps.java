@@ -4,9 +4,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import messaging.Event;
 import messaging.MessageQueue;
-import models.Merchant;
 import models.dtos.MerchantDto;
-import services.CorrelationId;
+import models.CorrelationId;
 import services.MerchantService;
 
 import java.util.UUID;

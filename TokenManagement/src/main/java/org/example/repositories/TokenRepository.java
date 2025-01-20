@@ -84,4 +84,15 @@ public class TokenRepository {
         validTokens.forEach((key, value) -> tokens.addAll(value));
         return tokens;
     }
+
+    public UUID getCustomerId(UUID customerToken) {
+        UUID customerId = null;
+        for  (HashMap.Entry<UUID, List<Token>> entry  : validTokens.entrySet()) {
+            if (entry.getValue().contains(customerToken)) {
+                customerId = entry.getKey();
+                break;
+            }
+        }
+        return customerId;
+    }
 }

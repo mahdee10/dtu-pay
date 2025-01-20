@@ -9,7 +9,7 @@ import services.customer.CustomerServiceFactory;
 
 import java.util.UUID;
 
-@Path("/customer")
+@Path("customers")
 public class CustomerController {
     CustomerService service = new CustomerServiceFactory().getService();
 
@@ -18,16 +18,14 @@ public class CustomerController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerCustomer(CreateCustomerDto customerRequest) {
         try {
-            var newCustomer = service.createCustomer(
-                    customerRequest
-            );
+            var newCustomer = service.createCustomer(customerRequest);
 
             return Response.status(Response.Status.OK)
                     .entity(newCustomer)
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Customer creation failed\"}")
+                    .entity("Customer creation failed")
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
@@ -37,26 +35,20 @@ public class CustomerController {
     @Path("/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteCustomer(@PathParam("customerId") UUID id) {
-        System.out.println("Attempting to delete customer with ID: " + id);
-        try {
-            boolean isDeleted = service.deregisterCustomer(id);
-            if (!isDeleted) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"Customer does not exist\"}")
-                        .type(MediaType.APPLICATION_JSON)
-                        .build();
-            }
-            return Response.status(Response.Status.OK)
-                    .entity("{\"message\": \"Customer deleted successfully\"}")
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \"An unexpected error occurred\"}")
+        boolean isDeleted = service.deregisterCustomer(id);
+
+        if (!isDeleted) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Customer does not exist")
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
+
+        return Response.status(Response.Status.OK)
+                .entity("Customer deleted successfully")
+                .type(MediaType.APPLICATION_JSON)
+                .build();
+
     }
 
 }

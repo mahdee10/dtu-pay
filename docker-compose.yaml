@@ -1,0 +1,43 @@
+services:
+  rabbitMq:
+    image: rabbitmq:3-management
+    container_name: rabbitMq_container
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+#  dtu-pay:
+#    build: ./DTU-Pay-Server
+#    image: dtu-pay
+#    container_name: dtu-pay
+#    ports:
+#      - "8080:8080"
+#    healthcheck:
+#      test: rabbitmq-diagnostics -q ping
+#      interval: 30s
+#      timeout: 30s
+#      retries: 3
+
+#  account-management-service:
+#    build: ./AccountManagement
+#    image: account-management-service
+#    container_name: account-management-service
+#    ports:
+#      - "8081:8080"
+#    healthcheck:
+#      test: rabbitmq-diagnostics -q ping
+#      interval: 30s
+#      timeout: 30s
+#      retries: 3
+#
+#  payment-management-service:
+#    build: ./PaymentManagement
+#    image: payment-management-service
+#    container_name: payment-management-service
+#    ports:
+#      - "8083:8080"
+#    healthcheck:
+#      test: rabbitmq-diagnostics -q ping
+#      interval: 30s
+#      timeout: 30s
+#      retries: 3

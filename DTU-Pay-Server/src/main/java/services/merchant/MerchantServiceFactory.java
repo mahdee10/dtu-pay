@@ -10,7 +10,7 @@ public class MerchantServiceFactory {
             return service;
         }
 
-        var mq = new RabbitMqQueue("rabbitMq");
+        var mq = new RabbitMqQueue("localhost");
         service = new MerchantService(mq);
         return service;
     }

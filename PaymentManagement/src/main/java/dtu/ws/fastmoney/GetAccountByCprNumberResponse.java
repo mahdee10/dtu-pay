@@ -1,0 +1,63 @@
+
+package dtu.ws.fastmoney;
+
+import dtu.ws.fastmoney.Account;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
+
+
+/**
+ * <p>Java class for getAccountByCprNumberResponse complex type.
+ * 
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>
+ * &lt;complexType name="getAccountByCprNumberResponse"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="return" type="{http://fastmoney.ws.dtu/}account" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
+ * </pre>
+ * 
+ * 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "getAccountByCprNumberResponse", propOrder = {
+    "_return"
+})
+public class GetAccountByCprNumberResponse {
+
+    @XmlElement(name = "return")
+    protected dtu.ws.fastmoney.Account _return;
+
+    /**
+     * Gets the value of the return property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link dtu.ws.fastmoney.Account }
+     *     
+     */
+    public dtu.ws.fastmoney.Account getReturn() {
+        return _return;
+    }
+
+    /**
+     * Sets the value of the return property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link dtu.ws.fastmoney.Account }
+     *     
+     */
+    public void setReturn(Account value) {
+        this._return = value;
+    }
+
+}

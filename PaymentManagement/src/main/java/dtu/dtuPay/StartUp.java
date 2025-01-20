@@ -9,7 +9,7 @@ public class StartUp {
     }
 
     private void startUp() throws Exception {
-        var mq = new RabbitMqQueue("rabbitMq");
+        var mq = new RabbitMqQueue("localhost");
         new PaymentService(mq);
     }
 }

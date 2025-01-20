@@ -11,6 +11,8 @@ public class CreateCustomerDto implements Serializable {
     private String cpr;
     private String bankAccountId;
 
+    public CreateCustomerDto() {}
+
     public String getFirstName() {
         return firstName;
     }

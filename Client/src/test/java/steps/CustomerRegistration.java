@@ -1,7 +1,6 @@
 package steps;
 
 import dtu.ws.fastmoney.User;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import models.dtos.UserRequestDto;
@@ -67,7 +66,7 @@ public class CustomerRegistration {
         payloadUser.setFirstName(userCustomer.getFirstName());
         payloadUser.setLastName(userCustomer.getLastName());
         payloadUser.setCpr(userCustomer.getCprNumber());
-        payloadUser.setBankAccountNumber(accountId);
+        payloadUser.setBankAccountId(accountId);
 
         customerId = customerService.createCustomer(payloadUser);
         assertNotNull(customerId, "Customer ID should not be null");

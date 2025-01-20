@@ -4,7 +4,9 @@ public class UserRequestDto {
     private String firstName;
     private String lastName;
     private String cpr;
-    private String bankAccountNumber;
+    private String bankAccountId;
+
+    public UserRequestDto() {}
 
     public String getFirstName() {
         return firstName;
@@ -30,11 +32,11 @@ public class UserRequestDto {
         this.cpr = cpr;
     }
 
-    public String getBankAccountNumber() {
-        return bankAccountNumber;
+    public String getBankAccountId() {
+        return bankAccountId;
     }
 
-    public void setBankAccountNumber(String bankAccountNumber) {
-        this.bankAccountNumber = bankAccountNumber;
+    public void setBankAccountId(String bankAccountId) {
+        this.bankAccountId = bankAccountId;
     }
 }

@@ -9,6 +9,8 @@ public class Customer {
     private String cpr;
     private String bankAccountId;
 
+    public Customer() {}
+
     public Customer(String firstName, String lastName, String cpr, String bankAccountId) {
         this.id =UUID.randomUUID();
         this.firstName = firstName;

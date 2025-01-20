@@ -1,11 +1,16 @@
 package dtu.dtuPay.services;
 
 import com.google.gson.Gson;
+import dtu.dtuPay.models.CorrelationId;
 import dtu.dtuPay.models.Payment;
+import dtu.dtuPay.models.PaymentRequestDto;
 import dtu.dtuPay.repositeries.PaymentRepository;
+import dtu.ws.fastmoney.BankServiceException_Exception;
+import lombok.SneakyThrows;
 import messaging.Event;
 import messaging.MessageQueue;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +32,8 @@ public class PaymentService {
     // External events
     private static final String TOKEN_VALIDATION_REQUESTED = "TokenValidationRequest";
     private static final String TOKEN_VALIDATION_RETURNED = "TokenValidationReturned";
+    private static final String GET_CUSTOMER_BANK_ACCOUNT_REQUESTED = "GetCustomerBankAccountRequested";
+    private static final String CUSTOMER_BANK_ACCOUNT_RESPONSE = "CustomerBankAccountResponse";
     private static final String VALIDATE_MERCHANT_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
     private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
 
@@ -35,8 +42,11 @@ public class PaymentService {
 
     private MessageQueue queue;
     private PaymentRepository paymentRepository = PaymentRepository.getInstance();
+    BankServiceImplementation bankService = new BankServiceImplementation();
     private Map<CorrelationId, CompletableFuture<Boolean>> correlations = new ConcurrentHashMap<>();
-    private Map<CorrelationId, CompletableFuture<UUID>> tokenValidationCorrelation = new ConcurrentHashMap<>();
+    private Map<CorrelationId, CompletableFuture<String>> correlationsAccounts = new ConcurrentHashMap<>();
+    private Map<CorrelationId, CompletableFuture<UUID>> tokenValidationCorrelations = new ConcurrentHashMap<>();
+    private Map<CorrelationId, CompletableFuture<String>> customerBankAccountCorrelations = new ConcurrentHashMap<>();
 
     public PaymentService(MessageQueue mq) {
         this.queue = mq;
@@ -52,11 +62,11 @@ public class PaymentService {
         this.queue.addHandler(TOKEN_VALIDATION_RETURNED, this::handleTokenValidationReturned);
         this.queue.addHandler(USE_TOKEN_RESPONSE, this::handleUseTokenResponse);
         this.queue.addHandler(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, this::handleMerchantAccountValidationResponse);
+        this.queue.addHandler(CUSTOMER_BANK_ACCOUNT_RESPONSE, this::handleGetCustomerBankAccountResponse);
     }
 
     private void publishPaymentExceptionally(CorrelationId correlationId, boolean isPaymentSuccessful, String exceptionMessage) {
-        Exception exception = new Exception(exceptionMessage);
-        Event failureEvent = new Event(PAYMENT_COMPLETED, new Object[] { correlationId, isPaymentSuccessful, exception});
+        Event failureEvent = new Event(PAYMENT_COMPLETED, new Object[] { correlationId, isPaymentSuccessful, exceptionMessage});
         queue.publish(failureEvent);
     }
 
@@ -67,77 +77,82 @@ public class PaymentService {
 
     private void handleTokenValidationReturned(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        UUID customerId = ev.getArgument(1, UUID.class);
-        boolean isValid = ev.getArgument(2, boolean.class);
+        boolean isValid = ev.getArgument(1, boolean.class);
 
-        if (!isValid) {
-            Exception exception = new Exception("Customer Token Validation Failed");
-            tokenValidationCorrelation.get(correlationId).completeExceptionally(exception);
-        } else {
-            tokenValidationCorrelation.get(correlationId).complete(customerId);
+        if (!isValid)
+        {
+            tokenValidationCorrelations.get(correlationId).complete(null);
+            return;
         }
+
+        UUID customerId = ev.getArgument(2, UUID.class);
+        tokenValidationCorrelations.get(correlationId).complete(customerId);
     }
 
-    private CompletableFuture<UUID>  validateCustomerToken(UUID customerToken, UUID paymentId, CorrelationId paymentCorrelationId) {
+    private UUID validateCustomerToken(UUID customerToken) {
         CorrelationId customerValidationCorrelationId = CorrelationId.randomId();
         CompletableFuture<UUID> futureCustomerTokenValidation = new CompletableFuture<>();
-        tokenValidationCorrelation.put(customerValidationCorrelationId, futureCustomerTokenValidation);
+        tokenValidationCorrelations.put(customerValidationCorrelationId, futureCustomerTokenValidation);
 
         Event customerTokenValidationEvent = new Event(TOKEN_VALIDATION_REQUESTED,
                 new Object[] { customerValidationCorrelationId, customerToken });
         queue.publish(customerTokenValidationEvent);
 
-        futureCustomerTokenValidation.whenComplete((responseCustomerId, throwable) -> {
-            if (throwable != null || responseCustomerId == null) {
-                publishPaymentExceptionally(paymentCorrelationId, false, throwable.getMessage());
-            }
-        });
-
-        return futureCustomerTokenValidation;
+        return futureCustomerTokenValidation.join();
     }
 
     private void handleMerchantAccountValidationResponse(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
+        String merchantBankAccount = ev.getArgument(1, String.class);
         boolean isValid = ev.getArgument(2, boolean.class);
 
-        if (!isValid) {
-            Exception exception = new Exception("Customer Token Validation Failed");
-            correlations.get(correlationId).completeExceptionally(exception);
-        } else {
-            correlations.get(correlationId).complete(isValid);
-        }
+        correlationsAccounts.get(correlationId).complete(isValid ? merchantBankAccount : null);
     }
 
-    public void validateMerchantAccount(UUID merchantId, CorrelationId paymentCorrelationId) {
+    public String validateMerchantAccount(UUID merchantId) {
         CorrelationId merchantValidationCorrelationId = CorrelationId.randomId();
-        CompletableFuture<Boolean> futureMerchantValidation = new CompletableFuture<>();
-        correlations.put(merchantValidationCorrelationId, futureMerchantValidation);
+        CompletableFuture<String> futureMerchantValidation = new CompletableFuture<>();
+        correlationsAccounts.put(merchantValidationCorrelationId, futureMerchantValidation);
 
         Event merchantAccountValidationEvent = new Event(VALIDATE_MERCHANT_ACCOUNT_REQUESTED,
-                new Object[] { merchantId, merchantValidationCorrelationId });
+                new Object[] { merchantValidationCorrelationId, merchantId });
         queue.publish(merchantAccountValidationEvent);
 
-        futureMerchantValidation.whenComplete((isAccountValid, throwable) -> {
-            if (throwable != null || isAccountValid == null) {
-                publishPaymentExceptionally(paymentCorrelationId, false, throwable.getMessage());
-            }
-        });
+        return futureMerchantValidation.join();
+    }
+
+    private void handleGetCustomerBankAccountResponse(Event e) {
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        String customerBankAccount = e.getArgument(2, String.class);
+
+        if (customerBankAccount.isEmpty()) {
+            customerBankAccountCorrelations.get(correlationId).complete(null);
+            return;
+        }
+
+        customerBankAccountCorrelations.get(correlationId).complete(customerBankAccount);
+    }
+
+    public String getCustomerBankAccount(UUID customerId) {
+        CorrelationId customerGetBankAccountCorrelationId = CorrelationId.randomId();
+        CompletableFuture<String> futureGetCustomerBankAccount = new CompletableFuture<>();
+        customerBankAccountCorrelations.put(customerGetBankAccountCorrelationId, futureGetCustomerBankAccount);
+
+        Event customerTokenValidationEvent = new Event(GET_CUSTOMER_BANK_ACCOUNT_REQUESTED,
+                new Object[] { customerGetBankAccountCorrelationId, customerId });
+        queue.publish(customerTokenValidationEvent);
+
+        return futureGetCustomerBankAccount.join();
     }
 
     private void handleUseTokenResponse(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         boolean tokenUsedSuccessfully = ev.getArgument(1, boolean.class);
 
-        if (!tokenUsedSuccessfully) {
-            Exception exception = new Exception("Using Customer Token Failed");
-            correlations.get(correlationId).completeExceptionally(exception);
-        } else {
-            correlations.get(correlationId).complete(tokenUsedSuccessfully);
-        }
-
+        correlations.get(correlationId).complete(tokenUsedSuccessfully);
     }
 
-    private void markTokenAsUsed(UUID customerToken, CorrelationId paymentCorrelationId) {
+    private boolean markTokenAsUsed(UUID customerToken) {
         CorrelationId useTokenCorrelationId = CorrelationId.randomId();
         CompletableFuture<Boolean> futureUseToken = new CompletableFuture<>();
         correlations.put(useTokenCorrelationId, futureUseToken);
@@ -145,36 +160,61 @@ public class PaymentService {
         Event useTokenEvent = new Event(USE_TOKEN_REQUEST, new Object[] { useTokenCorrelationId, customerToken });
         queue.publish(useTokenEvent);
 
-        futureUseToken.whenComplete((isTokenUsed, throwable) -> {
-            if (throwable != null || !isTokenUsed) {
-                publishPaymentExceptionally(paymentCorrelationId, false, throwable.getMessage());
-            }
-        });
+        return futureUseToken.join();
     }
 
     public void handlePaymentRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        UUID customerToken = ev.getArgument(1, UUID.class);
-        UUID merchantId = ev.getArgument(2, UUID.class);
-        double amount = ev.getArgument(3, double.class);
+        PaymentRequestDto paymentRequestDto = ev.getArgument(1, PaymentRequestDto.class);
 
-        Payment payment = new Payment(customerToken, merchantId, amount);
+        Payment payment = new Payment(
+                paymentRequestDto.getCustomerToken(),
+                paymentRequestDto.getMerchantId(),
+                paymentRequestDto.getAmount()
+        );
 
         // Merchant account validation
-        validateMerchantAccount(merchantId, correlationId);
+        String merchantBankAccount = validateMerchantAccount(paymentRequestDto.getMerchantId());
+        if (merchantBankAccount.isEmpty()) {
+            String exceptionMessage = "Merchant Bank Account Not Found";
+            publishPaymentExceptionally(correlationId, false, exceptionMessage);
+            return;
+        }
 
         // Customer Token Validation, saves customerId -> PaymentId in repository
-        CompletableFuture<UUID> futureCustomerTokenValidation = validateCustomerToken(customerToken, payment.getId(), correlationId);
+        UUID customerId = validateCustomerToken(paymentRequestDto.getCustomerToken());
+        if (customerId == null) {
+            String exceptionMessage = "Customer Token Validation Failed";
+            publishPaymentExceptionally(correlationId, false, exceptionMessage);
+            return;
+        }
+
+        String customerBankAccount = getCustomerBankAccount(customerId);
 
         // Mark token as used
-        markTokenAsUsed(customerToken, correlationId);
+        boolean tokenIsUsed = markTokenAsUsed(paymentRequestDto.getCustomerToken());
+        if (!tokenIsUsed) {
+            String exceptionMessage = "Using Customer Token Failed";
+            publishPaymentExceptionally(correlationId, false, exceptionMessage);
+        }
 
-        futureCustomerTokenValidation.thenAccept(responseCustomerId -> {
-            paymentRepository.addCustomerPayment(responseCustomerId, payment.getId());
-        });
+        try {
+            // Execute Payment
+            bankService.transferMoney(
+                    customerBankAccount, // Debtor account
+                    merchantBankAccount, // Creditor account
+                    BigDecimal.valueOf(paymentRequestDto.getAmount()),       // Amount to transfer
+                    "Money is being transferred"                               // Empty description
+            );
+        } catch (BankServiceException_Exception e) {
+            String exceptionMessage = "Payment execution failed.";
+            publishPaymentExceptionally(correlationId, false, exceptionMessage);
+            return;
+        }
 
         // Save customer and merchant payment info
-        paymentRepository.addMerchantPayment(merchantId, payment.getId());
+        paymentRepository.addCustomerPayment(customerId, payment.getId());
+        paymentRepository.addMerchantPayment(paymentRequestDto.getMerchantId(), payment.getId());
         paymentRepository.addPayment(payment);
 
         // Publish completion event

@@ -10,7 +10,7 @@ public class CustomerServiceFactory {
             return service;
         }
 
-        var mq = new RabbitMqQueue("rabbitMq");
+        var mq = new RabbitMqQueue("localhost");
         service = new CustomerService(mq);
         return service;
     }

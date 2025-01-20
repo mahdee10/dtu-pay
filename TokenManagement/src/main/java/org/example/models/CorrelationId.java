@@ -1,12 +1,14 @@
-package services;
+package org.example.models;
+
+import lombok.Value;
 
 import java.util.UUID;
 
-public record CorrelationId(UUID id) {
+@Value
+public class CorrelationId {
+    private UUID id;
 
     public static CorrelationId randomId() {
         return new CorrelationId(UUID.randomUUID());
     }
 }
-
-

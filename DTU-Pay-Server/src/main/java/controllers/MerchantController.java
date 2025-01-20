@@ -9,7 +9,7 @@ import services.merchant.MerchantServiceFactory;
 
 import java.util.UUID;
 
-@Path("/merchant")
+@Path("merchants")
 public class MerchantController {
     MerchantService service = new MerchantServiceFactory().getService();
 
@@ -18,16 +18,14 @@ public class MerchantController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerMerchant(CreateMerchantDto merchantRequest) {
         try {
-            var newMerchant = service.createMerchant(
-                    merchantRequest
-            );
+            var newMerchant = service.createMerchant(merchantRequest);
 
             return Response.status(Response.Status.OK)
                     .entity(newMerchant)
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Merchant creation failed\"}")
+                    .entity("Merchant creation failed")
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
@@ -37,26 +35,19 @@ public class MerchantController {
     @Path("/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteMerchant(@PathParam("merchantId") UUID id) {
-        System.out.println("Attempting to delete merchant with ID: " + id);
-        try {
-            boolean isDeleted = service.deregisterMerchant(id);
-            if (!isDeleted) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"merchant does not exist\"}")
-                        .type(MediaType.APPLICATION_JSON)
-                        .build();
-            }
-            return Response.status(Response.Status.OK)
-                    .entity("{\"message\": \"merchant deleted successfully\"}")
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \"An unexpected error occurred\"}")
+        boolean isDeleted = service.deregisterMerchant(id);
+
+        if (!isDeleted) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Merchant does not exist")
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
+        return Response.status(Response.Status.OK)
+                .entity("Merchant deleted successfully")
+                .type(MediaType.APPLICATION_JSON)
+                .build();
+
     }
 
 }

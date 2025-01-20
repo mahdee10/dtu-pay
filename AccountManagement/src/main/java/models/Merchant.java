@@ -9,6 +9,8 @@ public class Merchant {
     private String cpr;
     private String bankAccountId;
 
+    public Merchant() {}
+
     public Merchant(String firstName, String lastName, String cpr, String bankAccountId) {
         this.id =UUID.randomUUID();
         this.firstName = firstName;

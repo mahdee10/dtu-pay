@@ -2,12 +2,13 @@ package services.merchant;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import models.CorrelationId;
 import models.dtos.CreateMerchantDto;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import services.CorrelationId;
+
 public class MerchantService {
     private MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CompletableFuture<UUID>> registeredMerchantCorrelations = new ConcurrentHashMap<>();

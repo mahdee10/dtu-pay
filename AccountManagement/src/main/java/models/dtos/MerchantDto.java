@@ -6,6 +6,8 @@ public class MerchantDto {
     private String cpr;
     private String bankAccountId;
 
+    public MerchantDto() {}
+
     public String getFirstName() {
         return firstName;
     }

@@ -2,6 +2,7 @@ package services;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import models.CorrelationId;
 import models.Customer;
 import models.dtos.CustomerDto;
 import repositories.CustomerRepository;
@@ -26,7 +27,7 @@ public class CustomerService {
         this.queue = q;
         this.queue.addHandler(CUSTOMER_REGISTRATION_REQUESTED, this::handleCustomerRegistrationRequested);
         this.queue.addHandler(CUSTOMER_DEREGISTRATION_REQUESTED, this::handleCustomerDeregistrationRequested);
-//        this.queue.addHandler(GET_CUSTOMER_BANK_ACCOUNT_REQUESTED, this::handleGetCustomerBankAccountRequested);
+        this.queue.addHandler(GET_CUSTOMER_BANK_ACCOUNT_REQUESTED, this::handleGetCustomerBankAccountRequested);
         this.queue.addHandler(VALIDATE_CUSTOMER_ACCOUNT_REQUESTED, this::handleValidateCustomerAccountRequested);
     }
 
@@ -61,14 +62,16 @@ public class CustomerService {
         queue.publish(event);
     }
 
-//    public void handleGetCustomerBankAccountRequested(Event ev) {
-//        UUID customerId = ev.getArgument(0, UUID.class);
-//        Customer customer = customerRepository.getCustomer(customerId);
-//        String bankAccountId = customer != null ? customer.getBankAccountId() : null;
-//
-//        Event event = new Event(CUSTOMER_BANK_ACCOUNT_RESPONSE, new Object[]{customerId, bankAccountId});
-//        queue.publish(event);
-//    }
+    public void handleGetCustomerBankAccountRequested(Event ev) {
+        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
+        UUID customerId = ev.getArgument(1, UUID.class);
+
+        Customer customer = customerRepository.getCustomer(customerId);
+        String bankAccountId = customer != null ? customer.getBankAccountId() : null;
+
+        Event event = new Event(CUSTOMER_BANK_ACCOUNT_RESPONSE, new Object[]{ correlationId, customerId, bankAccountId});
+        queue.publish(event);
+    }
 
     public void handleValidateCustomerAccountRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
@@ -77,7 +80,7 @@ public class CustomerService {
         boolean isValid = customer != null;
 
         String customerAccountNumber = isValid ? customer.getBankAccountId() : null;
-        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{correlationId, customerAccountNumber, isValid});
+        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{ correlationId, isValid, customerAccountNumber });
         queue.publish(event);
     }
 }
