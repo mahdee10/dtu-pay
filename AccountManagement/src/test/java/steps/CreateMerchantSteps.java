@@ -6,6 +6,7 @@ import messaging.Event;
 import messaging.MessageQueue;
 import models.Merchant;
 import models.dtos.MerchantDto;
+import services.CorrelationId;
 import services.MerchantService;
 
 import java.util.UUID;
@@ -24,6 +25,7 @@ public class CreateMerchantSteps {
     MerchantService c = new MerchantService(queue);
     MerchantDto merchant;
     UUID expected;
+    private CorrelationId correlationId;
 
     @When("a {string} event for a merchant is received")
     public void aEventForAStudentIsReceived(String eventName) {
@@ -33,8 +35,11 @@ public class CreateMerchantSteps {
         merchant.setCpr("324-23-4324");
         merchant.setBankAccountId("432424f33q");
 
+        correlationId = CorrelationId.randomId();
+
+
         assertNull("Merchant ID should initially be null", expected);
-        c.handleMerchantRegistrationRequested(new Event(eventName,new Object[] {merchant}));
+        c.handleMerchantRegistrationRequested(new Event(eventName,new Object[] {correlationId,merchant}));
     }
 
     @Then("The {string} event is sent")
@@ -45,7 +50,7 @@ public class CreateMerchantSteps {
             assertEquals(eventName, event.getType());
 
 
-            UUID merchantId = event.getArgument(0, UUID.class);
+            UUID merchantId = event.getArgument(1, UUID.class);
             assertNotNull("Merchant ID should not be null", merchantId);
 
 

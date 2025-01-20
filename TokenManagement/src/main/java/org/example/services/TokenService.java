@@ -6,6 +6,7 @@ import messaging.MessageQueue;
 import org.example.models.Token;
 import org.example.repositories.TokenRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class TokenService {
     private static final String CUSTOMER_TOKENS_REQUESTED = "CustomerTokensRequest";
     private static final String CUSTOMER_TOKENS_RETURNED = "CustomerTokensReturned";
     private static final String REQUEST_TOKENS_EVENT = "RequestTokensEvent";
-    private static final String REQUEST_TOKENS_RESONSE = "RequestTokensResponse";
+    private static final String REQUEST_TOKENS_RESPONSE = "RequestTokensResponse";
     private static final String USE_TOKEN_REQUEST = "UseTokenRequest";
     private static final String USE_TOKEN_RESPONSE = "UseTokenResponse";
 
@@ -65,8 +66,31 @@ public class TokenService {
     }
 
     public void handleRequestTokensEvent(Event e) {
-        //logic
-        Event event = new Event(REQUEST_TOKENS_RESONSE, new Object[] {});
+    	UUID uuid = e.getArgument(0, UUID.class);
+    	Integer requestedTokens = e.getArgument(1, Integer.class);
+    	List<Token> tokenList = tokenRepository.getTokens(uuid);
+    	
+    	if(requestedTokens <= 5) {
+    		
+    		if(tokenList.size() <= 1) {
+    			List<Token> newTokenList = new ArrayList<>();
+    			for (int i = 0; i < requestedTokens; i++) {
+    				Token newToken = new Token(UUID.randomUUID(), true);
+    				  newTokenList.add(newToken);	  
+    				}
+    			tokenRepository.addTokens(uuid, newTokenList);
+    			Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] {newTokenList.size()});
+                queue.publish(event);
+                return;
+    		}
+    		
+    		Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] {new Exception("Too many active tokens")});
+            queue.publish(event);
+            return;
+    		
+    	}
+
+        Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] {new Exception("Too many tokens requested")});
         queue.publish(event);
     }
 

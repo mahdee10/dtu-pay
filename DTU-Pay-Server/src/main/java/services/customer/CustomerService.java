@@ -6,11 +6,12 @@ import models.dtos.CreateCustomerDto;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
+import java.util.concurrent.ConcurrentHashMap;
+import services.CorrelationId;
 public class CustomerService {
     private MessageQueue queue;
-    private CompletableFuture<UUID> registeredCustomer;
-    private CompletableFuture<Boolean> deregisteredCustomer;
+    private ConcurrentHashMap<CorrelationId, CompletableFuture<UUID>> registeredCustomerCorrelations = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<CorrelationId, CompletableFuture<Boolean>> deregisteredCustomerCorrelations = new ConcurrentHashMap<>();
 
     public CustomerService(MessageQueue q) {
         queue = q;
@@ -19,31 +20,38 @@ public class CustomerService {
     }
 
     public UUID createCustomer(CreateCustomerDto customer) {
-        registeredCustomer = new CompletableFuture<>();
-        Event event = new Event("CustomerRegistrationRequested", new Object[] { customer });
+        CorrelationId correlationId = CorrelationId.randomId();
+        registeredCustomerCorrelations.put(correlationId, new CompletableFuture<UUID>());
+
+        Event event = new Event("CustomerRegistrationRequested", new Object[]{correlationId, customer});
         queue.publish(event);
-        return registeredCustomer.join();
+
+        return registeredCustomerCorrelations.get(correlationId).join();
     }
 
     public void handleCustomerCreated(Event e) {
-        UUID customerId = e.getArgument(0, UUID.class);
-        registeredCustomer.complete(customerId);
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        UUID customerId = e.getArgument(1, UUID.class);
+
+        registeredCustomerCorrelations.get(correlationId).complete(customerId);
     }
 
     public boolean deregisterCustomer(UUID customerId) {
-        deregisteredCustomer = new CompletableFuture<>();
-        Event event = new Event("CustomerDeregistrationRequested", new Object[] { customerId });
+        CorrelationId correlationId = CorrelationId.randomId();
+        deregisteredCustomerCorrelations.put(correlationId, new CompletableFuture<Boolean>());
+
+        Event event = new Event("CustomerDeregistrationRequested", new Object[]{correlationId, customerId});
         queue.publish(event);
-        boolean b=deregisteredCustomer.join();
-        System.out.println(b);
-        return b;
+
+        return deregisteredCustomerCorrelations.get(correlationId).join();
     }
 
     public void handleDeregisteredCustomer(Event e) {
-        System.out.println("I am deleting now");
-        System.out.println(e);
-
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         Boolean isDeregistered = e.getArgument(1, Boolean.class);
-        deregisteredCustomer.complete(isDeregistered);
+
+        deregisteredCustomerCorrelations.get(correlationId).complete(isDeregistered);
+
+
     }
 }

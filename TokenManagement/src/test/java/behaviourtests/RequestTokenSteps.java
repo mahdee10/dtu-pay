@@ -1,8 +1,11 @@
 package behaviourtests;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -13,103 +16,87 @@ import io.cucumber.java.en.When;
 import messaging.Event;
 import messaging.MessageQueue;
 
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.example.models.Token;
+import org.example.repositories.TokenRepository;
+import org.example.services.TokenService;
+
 public class RequestTokenSteps {
 
-	private CompletableFuture<Event> publishedEvent = new CompletableFuture<>();
+    MessageQueue queue = mock(MessageQueue.class);
+    TokenService tokenService = new TokenService(queue);
+    TokenRepository tokenRepository = TokenRepository.getInstance();
 
-	private MessageQueue q = new MessageQueue() {
-
-		@Override
-		public void publish(Event event) {
-			publishedEvent.complete(event);
-		}
-
-		@Override
-		public void addHandler(String eventType, Consumer<Event> handler) {
-		}
-		
-	};
-
+    UUID userUUID;
+    UUID expectedUUID;
+    List<Token> receivedTokensList = new ArrayList<>();
 
 	public RequestTokenSteps() {
 	}
-
+	
+	@Given("an existing registered customer with id {string} with more than {int} active token")
+	public void an_existing_registered_customer_with_id_with_more_than_active_token(String uuid, Integer int1) {
+		Token token1 = new Token(UUID.randomUUID(), true);
+		Token token2 = new Token(UUID.randomUUID(), true);
+		
+		ArrayList<Token> tokenList = new ArrayList<Token>();
+		userUUID = UUID.fromString(uuid);
+		tokenList.add(token1);
+		tokenList.add((token2));
+		tokenRepository.addTokens(userUUID, tokenList);
+        assertTrue(tokenRepository.getTokens(userUUID).size() > int1);
+	}	
+	
 	@Given("a registered customer with id {string} with more than {int} active token")
-	public void a_registered_customer_with_id_with_more_than_active_token(String string, Integer int1) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+
+	@When("a registered customer with id {string} requests {int} tokens and an event RequestTokensEvent {string} is sent")
+	public void a_registered_customer_with_id_requests_tokens_and_an_event_request_tokens_event_is_sent(String uuid, Integer int1, String RequestTokensEvent) {
+		tokenService.handleRequestTokensEvent(new Event(RequestTokensEvent, new Object[] {uuid, int1}));
 	}
 
-	@When("a registered customer with id {string} requests tokens")
-	public void a_registered_customer_with_id_requests_tokens(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	@Then("a response RequestTokensResponse {string} is sent and throws and exception {string}")
+	public void a_response_request_tokens_response_is_sent_and_throws_and_exception(String RequestTokensResponse, String exception) {
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{new Exception(exception)}));
 	}
 
-	@Then("an event {string} is sent")
-	public void an_event_is_sent(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	@Given("an existing registered customer with id {string} with {int} or less active tokens")
+	public void an_existing_registered_customer_with_id_with_or_less_active_tokens(String uuid, Integer int1) {
+		Token token1 = new Token(UUID.randomUUID(), true);
+		
+		ArrayList<Token> tokenList = new ArrayList<Token>();
+		userUUID = UUID.fromString(uuid);
+		tokenList.add(token1);
+		tokenRepository.addTokens(userUUID, tokenList);
+        assertTrue(tokenRepository.getTokens(userUUID).size() <= int1);
 	}
 
-	@When("a response event {string} is sent")
-	public void a_response_event_is_sent(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	@When("a registered customer with id {string} requests {int} tokens an event RequestTokensEvent {string} is sent")
+	public void a_registered_customer_with_id_requests_tokens_an_event_request_tokens_event_is_sent(String uuid, Integer int1, String RequestTokensEvent) {
+		tokenService.handleRequestTokensEvent(new Event(RequestTokensEvent, new Object[] {uuid, int1}));
 	}
 
-	@Then("the response is unsuccessful")
-	public void the_response_is_unsuccessful() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	@Then("a response RequestTokensResponse {string} is sent containing a list with {int} new tokens")
+	public void a_response_request_tokens_response_is_sent_containing_a_list_with_new_tokens(String RequestTokensResponse, Integer int1) {
+		
+		for (int i = 0; i < int1; i++) {
+			Token newToken = new Token(UUID.randomUUID(), true);
+			receivedTokensList.add(newToken);	  
+			}
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{receivedTokensList.size()}));
 	}
 
-	@Then("the request is denied")
-	public void the_request_is_denied() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	@Then("a customer with id {string} has {int} active tokens")
+	public void a_customer_with_id_has_active_tokens(String uuid, Integer int1) {
+	    assertTrue(tokenRepository.getTokens(UUID.fromString(uuid)).size() == int1);
 	}
 
-	@Given("a registered customer with id {string} with {int} or less active tokens")
-	public void a_registered_customer_with_id_with_or_less_active_tokens(String string, Integer int1) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	@Then("a response RequestTokensResponse {string} is sent and throws an exception {string}")
+	public void a_response_request_tokens_response_is_sent_and_throws_an_exception(String RequestTokensResponse, String exception) {
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{new Exception(exception)}));
 	}
 
-	@When("a registered customer with id {string} requests less than {int} tokens")
-	public void a_registered_customer_with_id_requests_less_than_tokens(String string, Integer int1) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@When("a response event \"RequestTokensResponse\"is sent")
-	public void a_response_event_request_tokens_response_is_sent() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@Then("the response is successful")
-	public void the_response_is_successful() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@Then("the service will grant {int} active tokens to user")
-	public void the_service_will_grant_active_tokens_to_user(Integer int1) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@When("a registered customer with id {string} requests more than {int} tokens")
-	public void a_registered_customer_with_id_requests_more_than_tokens(String string, Integer int1) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@Then("response is unsuccessful")
-	public void response_is_unsuccessful() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
 
 }

@@ -2,26 +2,18 @@
 Feature: Requesting tokens 
 
   Scenario: Customer with more than one active token requests tokens
-     Given a registered customer with id "123" with more than 1 active token
-     When a registered customer with id "123" requests tokens
-     Then an event "RequestTokensEvent" is sent
-     When a response event "RequestTokensResponse" is sent
-     Then the response is unsuccessful
-     And the request is denied
+     Given an existing registered customer with id "256f6d23-8c12-47a4-ae02-0f5c3c957f62" with more than 1 active token
+     When a registered customer with id "256f6d23-8c12-47a4-ae02-0f5c3c957f62" requests 3 tokens and an event RequestTokensEvent "RequestTokensEvent" is sent
+     Then a response RequestTokensResponse "RequestTokensResponse" is sent and throws and exception "Too many active tokens"
      
-  Scenario: Customer with less than one active token requests less than 5 tokens
-     Given a registered customer with id "123" with 1 or less active tokens
-     When a registered customer with id "123" requests less than 5 tokens
-     Then an event "RequestTokensEvent" is sent
-     When a response event "RequestTokensResponse"is sent
-     Then the response is successful
-     And the service will grant 3 active tokens to user
+  Scenario: Customer with less than one active token requests up to 5 tokens
+     Given an existing registered customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" with 1 or less active tokens
+     When a registered customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" requests 3 tokens an event RequestTokensEvent "RequestTokensEvent" is sent
+     Then a response RequestTokensResponse "RequestTokensResponse" is sent containing a list with 3 new tokens
+     And a customer with id "aefcbde7-2133-4581-b43c-468c3247f2b0" has 4 active tokens
   
   Scenario: Customer requests more than the allowed amount of tokens
-     Given a registered customer with id "123" with 1 or less active tokens
-     When a registered customer with id "123" requests more than 5 tokens
-     Then an event "RequestTokensEvent" is sent
-     When a response event "RequestTokensResponse" is sent
-     Then response is unsuccessful
-     And the request is denied
+     Given an existing registered customer with id "7b137b1e-de3e-48e7-ac96-2f6e4ab7a04b" with 1 or less active tokens
+     When a registered customer with id "7b137b1e-de3e-48e7-ac96-2f6e4ab7a04b" requests 6 tokens and an event RequestTokensEvent "RequestTokensEvent" is sent
+     Then a response RequestTokensResponse "RequestTokensResponse" is sent and throws an exception "Too many tokens requested"
      
