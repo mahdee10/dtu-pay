@@ -6,6 +6,7 @@ import messaging.Event;
 import messaging.MessageQueue;
 import models.Customer;
 import models.dtos.CustomerDto;
+import services.CorrelationId;
 import services.CustomerService;
 
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class CreateCustomerSteps {
     CustomerService c = new CustomerService(queue);
     CustomerDto customer;
     UUID expected;
-
+    private CorrelationId correlationId;
     @When("a {string} event for a customer is received")
     public void aEventForAStudentIsReceived(String eventName) {
         customer = new CustomerDto();
@@ -32,9 +33,10 @@ public class CreateCustomerSteps {
         customer.setLastName("Gerard");
         customer.setCpr("324-23-4324");
         customer.setBankAccountId("432424f33q");
+        correlationId = CorrelationId.randomId();
 
         assertNull("Customer ID should initially be null", expected);
-        c.handleCustomerRegistrationRequested(new Event(eventName,new Object[] {customer}));
+        c.handleCustomerRegistrationRequested(new Event(eventName,new Object[] {correlationId,customer}));
     }
 
     @Then("the {string} event is sent")
@@ -45,7 +47,7 @@ public class CreateCustomerSteps {
             assertEquals(eventName, event.getType());
 
 
-            UUID customerId = event.getArgument(0, UUID.class);
+            UUID customerId = event.getArgument(1, UUID.class);
             assertNotNull("Customer ID should not be null", customerId);
 
 
