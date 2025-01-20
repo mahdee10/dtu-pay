@@ -70,8 +70,12 @@ public class TokenService {
     }
 
     public void handleUseTokenRequest(Event e) {
-        //logic
-        Event event = new Event(USE_TOKEN_RESPONSE, new Object[] {});
+        Event event = new Event(USE_TOKEN_REQUEST, new Object[] {"true"});
+        try {
+            tokenRepository.useToken(e.getArgument(0, UUID.class));
+        } catch (Exception exception) {
+           event = new Event(USE_TOKEN_RESPONSE, new Object[] {exception.getMessage()});
+        }
         queue.publish(event);
     }
 

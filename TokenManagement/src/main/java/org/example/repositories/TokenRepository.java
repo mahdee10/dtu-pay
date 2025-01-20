@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 // Create Repository class with singleton
 public class TokenRepository {
@@ -29,25 +30,36 @@ public class TokenRepository {
         return instance;
     }
 
-    public void useToken(UUID userUUID, UUID tokenUUID) {
-        Token tokenToUse = null;
-        if (validTokens.containsKey(userUUID)) {
-            List<Token> tokens = validTokens.get(userUUID);
-            if (!tokens.isEmpty()) {
-                tokenToUse = tokens.stream()
-                        .filter(token -> token.getUuid().equals(tokenUUID))
-                        .findFirst().orElse(null);
-                if (tokenToUse != null) {
-                    validTokens.get(userUUID).remove(tokenToUse);
-                }
+    public void useToken(UUID tokenUUID) {
+        boolean isValid = getAllTokens().stream().anyMatch(t -> t.getUuid().equals(tokenUUID));
+        if(!isValid) throw new RuntimeException("Invalid token");
+
+        AtomicReference<UUID> userUUID = new AtomicReference<>();
+        AtomicReference<Token> tokenToUse = new AtomicReference<>();
+
+        for (HashMap.Entry<UUID, List<Token>> entry : validTokens.entrySet()) {
+            UUID uuid = entry.getKey();
+            List<Token> tokens = entry.getValue();
+
+            Token token = tokens.stream().filter(t -> t.getUuid().equals(tokenUUID)).findFirst().orElse(null);
+            if (token != null) {
+                userUUID.set(uuid);
+                tokenToUse.set(token);
+                break;
             }
+        }
+        if (tokenToUse.get() == null) throw new RuntimeException("Token not found");
+
+        List<Token> validTokenList = validTokens.get(userUUID.get());
+        List<Token> invalidTokenList = invalidTokens.get(userUUID.get());
+
+        if (validTokenList != null) {
+            validTokenList.remove(tokenToUse.get());
+            invalidTokenList.add(tokenToUse.get());
         }
 
-        if (invalidTokens.containsKey(userUUID)) {
-            if (tokenToUse != null) {
-                invalidTokens.get(userUUID).add(tokenToUse);
-            }
-        }
+        validTokens.put(userUUID.get(), validTokenList);
+        invalidTokens.put(userUUID.get(), invalidTokenList);
     }
 
     public void addTokens(UUID userUUID, List<Token> tokens) {
