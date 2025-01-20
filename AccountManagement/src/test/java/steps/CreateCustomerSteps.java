@@ -48,6 +48,7 @@ public class CreateCustomerSteps {
 
 
             UUID customerId = event.getArgument(1, UUID.class);
+            assertEquals(event.getArgument(0,CorrelationId.class),correlationId);
             assertNotNull("Customer ID should not be null", customerId);
 
 
