@@ -1,5 +1,6 @@
 package org.example.repositories;
 
+import io.cucumber.java.bs.A;
 import org.example.models.Token;
 
 import java.util.ArrayList;
@@ -30,9 +31,9 @@ public class TokenRepository {
         return instance;
     }
 
-    public void useToken(UUID tokenUUID) {
+    public void useToken(UUID tokenUUID) throws Exception {
         boolean isValid = getAllTokens().stream().anyMatch(t -> t.getUuid().equals(tokenUUID));
-        if(!isValid) throw new RuntimeException("Invalid token");
+        if(!isValid) throw new Exception("Invalid token");
 
         AtomicReference<UUID> userUUID = new AtomicReference<>();
         AtomicReference<Token> tokenToUse = new AtomicReference<>();
@@ -48,10 +49,10 @@ public class TokenRepository {
                 break;
             }
         }
-        if (tokenToUse.get() == null) throw new RuntimeException("Token not found");
+        if (tokenToUse.get() == null) throw new Exception("Token not found.");
 
         List<Token> validTokenList = validTokens.get(userUUID.get());
-        List<Token> invalidTokenList = invalidTokens.get(userUUID.get());
+        List<Token> invalidTokenList = invalidTokens.get(userUUID.get()) != null ? invalidTokens.get(userUUID.get()) : new ArrayList<Token>();
 
         if (validTokenList != null) {
             validTokenList.remove(tokenToUse.get());

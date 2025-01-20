@@ -1,5 +1,6 @@
 package org.example.services;
 
+import io.cucumber.java.an.E;
 import messaging.Event;
 import messaging.MessageQueue;
 import org.example.models.Token;
@@ -40,13 +41,13 @@ public class TokenService {
         if (!isValid) {
             boolean exists = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(uuid));
             if (!exists) {
-                Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[] {new Exception("Token not found.")});
+                Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[]{"Token not found."});
                 queue.publish(event);
                 return;
             }
         }
 
-        Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[] {isValid});
+        Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[]{isValid});
         queue.publish(event);
     }
 
@@ -70,11 +71,11 @@ public class TokenService {
     }
 
     public void handleUseTokenRequest(Event e) {
-        Event event = new Event(USE_TOKEN_REQUEST, new Object[] {"true"});
+        Event event = new Event(USE_TOKEN_RESPONSE, new Object[] {true});
         try {
             tokenRepository.useToken(e.getArgument(0, UUID.class));
         } catch (Exception exception) {
-           event = new Event(USE_TOKEN_RESPONSE, new Object[] {exception.getMessage()});
+           event = new Event(USE_TOKEN_RESPONSE, new Object[] {new Exception(exception.getMessage())});
         }
         queue.publish(event);
     }

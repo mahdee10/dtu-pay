@@ -1,7 +1,5 @@
 package behaviourtests;
 
-import io.cucumber.java.an.E;
-
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -14,14 +12,12 @@ import org.example.services.TokenService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
-public class TokensValidateSteps {
+public class TokensUseValidateSteps {
 
     MessageQueue queue = mock(MessageQueue.class);
     TokenService s = new TokenService(queue);
@@ -45,7 +41,8 @@ public class TokensValidateSteps {
     }
     @When("the event {string} is received")
     public void the_event_is_received(String eventName) {
-        s.handleTokenValidationRequest(new Event(eventName, new Object[] {receivedTokenUUID}));
+        if (eventName.equals("TokenValidationRequest")) s.handleTokenValidationRequest(new Event(eventName, new Object[] {receivedTokenUUID}));
+        if (eventName.equals("UseTokenRequest")) s.handleUseTokenRequest(new Event(eventName, new Object[] {receivedTokenUUID}));
     }
 
     @Then("a response event {string} is sent and contains the value {string}")
@@ -56,8 +53,13 @@ public class TokensValidateSteps {
 
     @Then("a response event {string} is sent and throws an exception {string}")
     public void a_response_event_is_sent_and_throws_an_exception(String string, String string2) {
-        verify(queue).publish(new Event(string, new Object[]{new Exception(string2)}));
+        verify(queue,atLeastOnce()).publish(new Event(string, new Object[]{string2}));
     }
 
-    public TokensValidateSteps() {}
+    public TokensUseValidateSteps() {}
+
+    @Given("a payment service supplies a valid token with UUID {string} to pay")
+    public void aPaymentServiceSuppliesAValidTokenWithUUIDToPay(String arg0) {
+        a_payment_service_supplies_a_token_with_id_to_validate("valid", arg0);
+    }
 }
