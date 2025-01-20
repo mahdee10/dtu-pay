@@ -37,7 +37,7 @@ public class CustomerService {
         var customerDto = ev.getArgument(1, CustomerDto.class);
 
 
-        Customer customer=
+        Customer customer =
                 new Customer(
                         customerDto.getFirstName(),
                         customerDto.getLastName(),
@@ -45,14 +45,14 @@ public class CustomerService {
                         customerDto.getBankAccountId());
         customerRepository.addCustomer(customer);
 
-        System.out.println("I created "+customer.getFirstName());
+        System.out.println("I created " + customer.getFirstName());
 
-        Event event = new Event(CUSTOMER_CREATED, new Object[] { correlationId,customer.getId() });
+        Event event = new Event(CUSTOMER_CREATED, new Object[]{correlationId, customer.getId()});
         queue.publish(event);
     }
 
     public void handleCustomerDeregistrationRequested(Event ev) {
-        CorrelationId correlationId=ev.getArgument(0, CorrelationId.class);
+        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         UUID customerId = ev.getArgument(1, UUID.class);
         boolean isDeleted = customerRepository.removeCustomer(customerId);
         System.out.println(isDeleted);
@@ -71,13 +71,13 @@ public class CustomerService {
 //    }
 
     public void handleValidateCustomerAccountRequested(Event ev) {
-        CorrelationId correlationId=ev.getArgument(0, CorrelationId.class);
+        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         UUID customerId = ev.getArgument(1, UUID.class);
         Customer customer = customerRepository.getCustomer(customerId);
         boolean isValid = customer != null;
 
         String customerAccountNumber = isValid ? customer.getBankAccountId() : null;
-        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{correlationId,customerAccountNumber, isValid});
+        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{correlationId, customerAccountNumber, isValid});
         queue.publish(event);
     }
 }
