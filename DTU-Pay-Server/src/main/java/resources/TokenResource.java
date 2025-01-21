@@ -3,6 +3,7 @@ package resources;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import models.TokenEventMessage;
 import models.dtos.PaymentRequestDto;
 import models.dtos.TokenRequestDto;
 import services.TokenService;
@@ -18,10 +19,16 @@ public class TokenResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createTokens(TokenRequestDto tokenRequestDto) {
-        int nTokensCreated = service.createTokens(tokenRequestDto.getCustomerId(), tokenRequestDto.getNTokens());
+        TokenEventMessage eventMessage = service.createTokens(tokenRequestDto.getCustomerId(), tokenRequestDto.getNTokens());
+
+        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(eventMessage.getExceptionMessage())
+                    .build();
+        }
 
         return Response.status(Response.Status.OK)
-                .entity(nTokensCreated)
+                .entity(eventMessage.getCreatedTokens())
                 .build();
     }
 
@@ -30,10 +37,16 @@ public class TokenResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getToken(@PathParam("customerId") UUID customerId) {
-        UUID tokenUUID = service.getToken(customerId);
+        TokenEventMessage eventMessage = service.getToken(customerId);
+
+        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(eventMessage.getExceptionMessage())
+                    .build();
+        }
 
         return Response.status(Response.Status.OK)
-                .entity(tokenUUID)
+                .entity(eventMessage.getTokenUUID())
                 .build();
     }
 }

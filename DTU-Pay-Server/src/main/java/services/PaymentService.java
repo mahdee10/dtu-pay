@@ -4,6 +4,7 @@ import messaging.Event;
 import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
 import models.CorrelationId;
+import models.PaymentEventMessage;
 import models.dtos.PaymentRequestDto;
 
 import java.util.Map;
@@ -25,7 +26,7 @@ public class PaymentService {
     static PaymentService service = null;
 
     private MessageQueue queue;
-    private Map<CorrelationId, CompletableFuture<Boolean>> correlations = new ConcurrentHashMap<>();
+    private Map<CorrelationId, CompletableFuture<PaymentEventMessage>> correlations = new ConcurrentHashMap<>();
 
     public static synchronized PaymentService getInstance() {
         if (service != null) {
@@ -42,29 +43,27 @@ public class PaymentService {
         queue.addHandler(PAYMENT_COMPLETED, this::handlePaymentComplete);
     }
 
+    private void handlePaymentComplete(Event event) {
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+        PaymentEventMessage eventMessage = event.getArgument(1, PaymentEventMessage.class);
 
-    public Boolean pay(PaymentRequestDto paymentRequestDto) {
+        correlations.get(correlationId).complete(eventMessage);
+    }
+
+
+    public PaymentEventMessage pay(PaymentRequestDto paymentRequestDto) {
         CorrelationId correlationId = CorrelationId.randomId();
-        CompletableFuture<Boolean> futurePaymentRequestCompleted = new CompletableFuture<>();
+        CompletableFuture<PaymentEventMessage> futurePaymentRequestCompleted = new CompletableFuture<>();
         correlations.put(correlationId, futurePaymentRequestCompleted);
+
+        PaymentEventMessage eventMessage = new PaymentEventMessage();
+        eventMessage.setCustomerToken(UUID.fromString(paymentRequestDto.getCustomerToken()));
+        eventMessage.setMerchantId(UUID.fromString(paymentRequestDto.getMerchantId()));
+        eventMessage.setAmount(paymentRequestDto.getAmount());
 
         Event event = new Event(PAYMENT_REQUESTED, new Object[] { correlationId, paymentRequestDto });
         queue.publish(event);
 
         return futurePaymentRequestCompleted.join();
-    }
-
-    private void handlePaymentComplete(Event event) {
-        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
-        boolean isPaymentSuccessfull = event.getArgument(1, Boolean.class);
-
-        if (!isPaymentSuccessfull) {
-            String exceptionMessage = event.getArgument(2, String.class);
-            correlations.get(correlationId).completeExceptionally(new Exception(exceptionMessage));
-            return;
-        }
-
-        UUID paymentId = event.getArgument(2, UUID.class);
-        correlations.get(correlationId).complete(isPaymentSuccessfull);
     }
 }

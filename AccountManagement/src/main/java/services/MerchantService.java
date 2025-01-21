@@ -2,22 +2,21 @@ package services;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import models.AccountEventMessage;
 import models.CorrelationId;
 import models.Merchant;
-import models.dtos.MerchantDto;
 import repositories.MerchantRepository;
-
-import java.util.UUID;
 
 public class MerchantService {
     private static final String Merchant_REGISTRATION_REQUESTED = "MerchantRegistrationRequested";
     private static final String Merchant_CREATED = "MerchantCreated";
     private static final String Merchant_DEREGISTRATION_REQUESTED = "MerchantDeregistrationRequested";
     private static final String Merchant_DEREGISTERED = "MerchantDeregistered";
-    private static final String GET_Merchant_BANK_ACCOUNT_REQUESTED = "GetMerchantBankAccountRequested";
-    private static final String Merchant_BANK_ACCOUNT_RESPONSE = "MerchantBankAccountResponse";
     private static final String VALIDATE_Merchant_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
     private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
+
+    public static final int BAD_REQUEST = 400;
+    public static final int OK = 200;
 
     MessageQueue queue;
     MerchantRepository merchantRepository = MerchantRepository.getInstance();
@@ -27,58 +26,57 @@ public class MerchantService {
         this.queue = q;
         this.queue.addHandler(Merchant_REGISTRATION_REQUESTED, this::handleMerchantRegistrationRequested);
         this.queue.addHandler(Merchant_DEREGISTRATION_REQUESTED, this::handleMerchantDeregistrationRequested);
-//        this.queue.addHandler(GET_Merchant_BANK_ACCOUNT_REQUESTED, this::handleGetMerchantBankAccountRequested);
         this.queue.addHandler(VALIDATE_Merchant_ACCOUNT_REQUESTED, this::handleValidateMerchantAccountRequested);
     }
 
     public void handleMerchantRegistrationRequested(Event ev) {
-
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        System.out.println(correlationId);
-        var merchantDto = ev.getArgument(1, MerchantDto.class);
-
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
 
         Merchant merchant=
                 new Merchant(
-                        merchantDto.getFirstName(),
-                        merchantDto.getLastName(),
-                        merchantDto.getCpr(),
-                        merchantDto.getBankAccountId());
+                        eventMessage.getFirstName(),
+                        eventMessage.getLastName(),
+                        eventMessage.getCpr(),
+                        eventMessage.getBankAccount());
         merchantRepository.addMerchant(merchant);
 
         System.out.println("I created "+merchant.getFirstName());
 
-        Event event = new Event(Merchant_CREATED, new Object[] { correlationId,merchant.getId() });
+        eventMessage.setRequestResponseCode(OK);
+        eventMessage.setMerchantId(merchant.getId());
+
+        Event event = new Event(Merchant_CREATED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 
     public void handleMerchantDeregistrationRequested(Event ev) {
         CorrelationId correlationId=ev.getArgument(0, CorrelationId.class);
-        UUID merchantId = ev.getArgument(1, UUID.class);
-        boolean isDeleted = merchantRepository.removeMerchant(merchantId);
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
+
+        boolean isDeleted = merchantRepository.removeMerchant(eventMessage.getMerchantId());
         System.out.println(isDeleted);
 
-        Event event = new Event(Merchant_DEREGISTERED, new Object[]{correlationId, isDeleted});
+        eventMessage.setIsAccountDeleted(isDeleted);
+        eventMessage.setRequestResponseCode(OK);
+
+        Event event = new Event(Merchant_DEREGISTERED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 
-//    public void handleGetMerchantBankAccountRequested(Event ev) {
-//        UUID merchantId = ev.getArgument(0, UUID.class);
-//        Merchant merchant = merchantRepository.getMerchant(merchantId);
-//        String bankAccountId = merchant != null ? merchant.getBankAccountId() : null;
-//
-//        Event event = new Event(Merchant_BANK_ACCOUNT_RESPONSE, new Object[]{merchantId, bankAccountId});
-//        queue.publish(event);
-//    }
-
     public void handleValidateMerchantAccountRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        UUID merchantId = ev.getArgument(1, UUID.class);
-        Merchant merchant = merchantRepository.getMerchant(merchantId);
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
+
+        Merchant merchant = merchantRepository.getMerchant(eventMessage.getMerchantId());
         boolean isValid = merchant != null;
 
-        String merchantAccountNumber = isValid ? merchant.getBankAccountId() : null;
-        Event event = new Event(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, new Object[]{ correlationId, merchantAccountNumber, isValid});
+        eventMessage.setBankAccount(isValid ? merchant.getBankAccountId() : null);
+        eventMessage.setIsValidAccount(isValid);
+        eventMessage.setRequestResponseCode(isValid ? OK : BAD_REQUEST);
+        eventMessage.setExceptionMessage(isValid ? null : "Merchant account does not exist.");
+
+        Event event = new Event(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 }

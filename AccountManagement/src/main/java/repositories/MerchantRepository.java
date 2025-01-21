@@ -1,6 +1,6 @@
 package repositories;
-import models.Merchant;
 
+import models.Merchant;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -38,5 +38,15 @@ public class MerchantRepository {
             return true;
         }
         return false;
+    }
+
+    public UUID getMerchantByCPR(String cpr) {
+        for (Merchant merchant : merchants.values()) {
+            if (merchant.getCpr().equalsIgnoreCase(cpr)) {
+                return merchant.getId();
+            }
+        }
+
+        return null;
     }
 }

@@ -2,9 +2,9 @@ package services;
 
 import messaging.Event;
 import messaging.MessageQueue;
+import models.AccountEventMessage;
 import models.CorrelationId;
 import models.Customer;
-import models.dtos.CustomerDto;
 import repositories.CustomerRepository;
 
 import java.util.UUID;
@@ -19,6 +19,9 @@ public class CustomerService {
     private static final String VALIDATE_CUSTOMER_ACCOUNT_REQUESTED = "ValidateCustomerAccountRequested";
     private static final String CUSTOMER_ACCOUNT_VALIDATION_RESPONSE = "CustomerAccountValidationResponse";
 
+    public static final int BAD_REQUEST = 400;
+    public static final int OK = 200;
+
     MessageQueue queue;
     CustomerRepository customerRepository = CustomerRepository.getInstance();
 
@@ -32,55 +35,69 @@ public class CustomerService {
     }
 
     public void handleCustomerRegistrationRequested(Event ev) {
-
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        System.out.println(correlationId);
-        var customerDto = ev.getArgument(1, CustomerDto.class);
-
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
 
         Customer customer =
                 new Customer(
-                        customerDto.getFirstName(),
-                        customerDto.getLastName(),
-                        customerDto.getCpr(),
-                        customerDto.getBankAccountId());
+                        eventMessage.getFirstName(),
+                        eventMessage.getLastName(),
+                        eventMessage.getCpr(),
+                        eventMessage.getBankAccount());
         customerRepository.addCustomer(customer);
+
+        eventMessage.setCustomerId(customer.getId());
+        eventMessage.setRequestResponseCode(OK);
 
         System.out.println("I created " + customer.getFirstName());
 
-        Event event = new Event(CUSTOMER_CREATED, new Object[]{correlationId, customer.getId()});
+        Event event = new Event(CUSTOMER_CREATED, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
     }
 
     public void handleCustomerDeregistrationRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        UUID customerId = ev.getArgument(1, UUID.class);
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
+        UUID customerId = eventMessage.getCustomerId();
+
         boolean isDeleted = customerRepository.removeCustomer(customerId);
         System.out.println(isDeleted);
 
-        Event event = new Event(CUSTOMER_DEREGISTERED, new Object[]{correlationId, isDeleted});
+        eventMessage.setIsAccountDeleted(isDeleted);
+        eventMessage.setRequestResponseCode(OK);
+
+        Event event = new Event(CUSTOMER_DEREGISTERED, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
     }
 
     public void handleGetCustomerBankAccountRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        UUID customerId = ev.getArgument(1, UUID.class);
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
+        UUID customerId = eventMessage.getCustomerId();
 
         Customer customer = customerRepository.getCustomer(customerId);
         String bankAccountId = customer != null ? customer.getBankAccountId() : null;
 
-        Event event = new Event(CUSTOMER_BANK_ACCOUNT_RESPONSE, new Object[]{ correlationId, customerId, bankAccountId});
+        eventMessage.setBankAccount(bankAccountId);
+        eventMessage.setRequestResponseCode(OK);
+
+        Event event = new Event(CUSTOMER_BANK_ACCOUNT_RESPONSE, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
     }
 
     public void handleValidateCustomerAccountRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        UUID customerId = ev.getArgument(1, UUID.class);
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
+        UUID customerId = eventMessage.getCustomerId();
         Customer customer = customerRepository.getCustomer(customerId);
         boolean isValid = customer != null;
 
-        String customerAccountNumber = isValid ? customer.getBankAccountId() : null;
-        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{ correlationId, isValid, customerAccountNumber });
+        eventMessage.setBankAccount(isValid ? customer.getBankAccountId() : null);
+        eventMessage.setIsValidAccount(isValid);
+        eventMessage.setRequestResponseCode(isValid ? OK : BAD_REQUEST);
+        eventMessage.setExceptionMessage(isValid ? null : "Customer account does not exist.");
+
+        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
     }
 }

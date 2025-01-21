@@ -6,6 +6,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import models.PaymentEventMessage;
 import models.dtos.PaymentRequestDto;
 import services.PaymentService;
 
@@ -18,10 +19,16 @@ public class PaymentResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response paymentRequest(PaymentRequestDto paymentRequest) {
-        Boolean isPaymentSuccessfull = service.pay(paymentRequest);
+        PaymentEventMessage eventMessage = service.pay(paymentRequest);
+
+        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(eventMessage.getExceptionMessage())
+                    .build();
+        }
 
         return Response.status(Response.Status.OK)
-                .entity(isPaymentSuccessfull)
+                .entity(true)
                 .build();
     }
 }

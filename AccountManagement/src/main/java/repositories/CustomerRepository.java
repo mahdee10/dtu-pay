@@ -1,6 +1,6 @@
 package repositories;
-import models.Customer;
 
+import models.Customer;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -38,5 +38,15 @@ public class CustomerRepository {
             return true;
         }
         return false;
+    }
+
+    public UUID getCustomerByCPR(String cpr) {
+        for (Customer customer : customers.values()) {
+            if (customer.getCpr().equalsIgnoreCase(cpr)) {
+                return customer.getId();
+            }
+        }
+
+        return null;
     }
 }

@@ -1,10 +1,7 @@
 package steps;
 
-import com.google.gson.Gson;
-import dtu.dtuPay.models.Payment;
-import dtu.dtuPay.models.PaymentRequestDto;
+import dtu.dtuPay.models.*;
 import dtu.dtuPay.repositeries.PaymentRepository;
-import dtu.dtuPay.models.CorrelationId;
 import dtu.dtuPay.services.BankServiceImplementation;
 import dtu.dtuPay.services.PaymentService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
@@ -30,6 +27,10 @@ public class PaymentSteps {
     private Payment expectedPayment;
     private List<Payment> expectedPaymentList;
     private CorrelationId correlationId;
+    PaymentEventMessage eventMessage;
+
+    public static final int BAD_REQUEST = 400;
+    public static final int OK = 200;
 
     public PaymentSteps() {}
 
@@ -41,30 +42,54 @@ public class PaymentSteps {
         merchantId = UUID.randomUUID();
         amount = 20.0;
 
-        PaymentRequestDto paymentDto = new PaymentRequestDto(customerToken, merchantId, amount);
-        Event event = new Event(eventName, new Object[] { correlationId, paymentDto });
+        eventMessage = new PaymentEventMessage();
+        eventMessage.setCustomerToken(customerToken);
+        eventMessage.setMerchantId(merchantId);
+        eventMessage.setAmount(amount);
 
         String validCustomerBankAccount = String.valueOf(UUID.randomUUID());
         String validMerchantBankAccount = String.valueOf(UUID.randomUUID());
+
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
 
         // Stub queue.publish to simulate event handling
         doAnswer(invocation -> {
             Event publishedEvent = invocation.getArgument(0, Event.class);
             CorrelationId validationCorrelationId = publishedEvent.getArgument(0, CorrelationId.class);
+            AccountEventMessage accountEventMessage;
+            TokenEventMessage tokenEventMessage;
+            UUID customerId = UUID.randomUUID();
 
             switch (publishedEvent.getType()) {
                 case "ValidateMerchantAccountRequested":
-                    service.bankAccountCorrelations.get(validationCorrelationId).complete(validMerchantBankAccount);
+                    accountEventMessage = new AccountEventMessage();
+                    accountEventMessage.setMerchantId(merchantId);
+                    accountEventMessage.setIsValidAccount(true);
+                    accountEventMessage.setRequestResponseCode(OK);
+                    accountEventMessage.setBankAccount(validMerchantBankAccount);
+                    service.accountCorrelations.get(validationCorrelationId).complete(accountEventMessage);
                     break;
                 case "GetCustomerBankAccountRequested":
-                    service.bankAccountCorrelations.get(validationCorrelationId).complete(validCustomerBankAccount);
+                    accountEventMessage = new AccountEventMessage();
+                    accountEventMessage.setCustomerId(customerId);
+                    accountEventMessage.setRequestResponseCode(OK);
+                    accountEventMessage.setBankAccount(validCustomerBankAccount);
+                    service.accountCorrelations.get(validationCorrelationId).complete(accountEventMessage);
                     break;
                 case "TokenValidationRequest":
-                    UUID customerId = UUID.randomUUID();
-                    service.tokenValidationCorrelations.get(validationCorrelationId).complete(customerId);
+                    tokenEventMessage = new TokenEventMessage();
+                    tokenEventMessage.setTokenUUID(customerToken);
+                    tokenEventMessage.setCustomerId(customerId);
+                    tokenEventMessage.setRequestResponseCode(OK);
+                    tokenEventMessage.setIsValid(true);
+                    service.tokenCorrelations.get(validationCorrelationId).complete(tokenEventMessage);
                     break;
                 case "UseTokenRequest":
-                    service.correlations.get(validationCorrelationId).complete(true);
+                    tokenEventMessage = new TokenEventMessage();
+                    tokenEventMessage.setTokenUUID(customerToken);
+                    tokenEventMessage.setRequestResponseCode(OK);
+                    tokenEventMessage.setIsTokenUsed(true);
+                    service.tokenCorrelations.get(validationCorrelationId).complete(tokenEventMessage);
                     break;
             }
 
@@ -82,7 +107,9 @@ public class PaymentSteps {
                         payment.getAmount() == amount)
                 .findFirst().orElse(null);
 
-        Event event = new Event(eventName, new Object[] { correlationId, true, expectedPayment.getId()});
+        eventMessage.setRequestResponseCode(OK);
+        eventMessage.setPaymentId(expectedPayment.getId());
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
         verify(queue).publish(event);
     }
 
@@ -107,23 +134,21 @@ public class PaymentSteps {
     @When("{string} event to get all payments is received")
     public void eventToGetAllPaymentsIsReceived(String eventName) {
         correlationId = CorrelationId.randomId();
-        Event event = new Event(eventName, new Object[] { correlationId });
+        eventMessage = new PaymentEventMessage();
+
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
         service.handleGetPaymentsRequested(event);
     }
 
     @Then("the payments are fetched and the {string} event is sent")
     public void thePaymentsAreFetchedAndTheEventIsSent(String eventName) {
         expectedPaymentList.sort(Comparator.comparing(Payment::getId));
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(expectedPaymentList.toArray());
 
-        Event event = new Event(eventName, new Object[] { correlationId, jsonString });
+        eventMessage.setRequestResponseCode(OK);
+        eventMessage.setPaymentList(expectedPaymentList);
+
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
         verify(queue).publish(event);
-
-        // Deserialize List object
-//        Gson gson = new Gson();
-//        String jsonResponse = actualEvent.getArgument(0, String.class);
-//        List<Payment> actualPayments = gson.fromJson(jsonResponse, new GenericType<List<Payment>>(){}.getType());
     }
 
     @Then("the user gets the list of payments")
@@ -148,7 +173,10 @@ public class PaymentSteps {
     @When("{string} event to get all the customer payments is received for customer {string}")
     public void eventToGetAllTheCustomerPaymentsIsReceived(String eventName, String customerId) {
         correlationId = CorrelationId.randomId();
-        Event event = new Event(eventName, new Object[] { correlationId, UUID.fromString(customerId) });
+        eventMessage = new PaymentEventMessage();
+        eventMessage.setCustomerId(UUID.fromString(customerId));
+
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
         service.handleGetCustomerPaymentsRequested(event);
     }
 
@@ -169,7 +197,10 @@ public class PaymentSteps {
     @When("{string} event to get all the merchant payments is received for merchant {string}")
     public void eventToGetAllTheMerchantPaymentsIsReceived(String eventName, String merchantId) {
         correlationId = CorrelationId.randomId();
-        Event event = new Event(eventName, new Object[] { correlationId, UUID.fromString(merchantId) });
+        eventMessage = new PaymentEventMessage();
+        eventMessage.setMerchantId(UUID.fromString(merchantId));
+
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
         service.handleGetMerchantPaymentsRequested(event);
     }
 }

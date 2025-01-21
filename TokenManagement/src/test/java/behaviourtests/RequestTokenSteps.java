@@ -7,9 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,7 +17,10 @@ import messaging.MessageQueue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.example.models.CorrelationId;
 import org.example.models.Token;
+import org.example.models.TokenEventMessage;
 import org.example.repositories.TokenRepository;
 import org.example.services.TokenService;
 
@@ -31,8 +31,12 @@ public class RequestTokenSteps {
     TokenRepository tokenRepository = TokenRepository.getInstance();
 
     UUID userUUID;
-    UUID expectedUUID;
-    List<Token> receivedTokensList = new ArrayList<>();
+	List<Token> receivedTokensList = new ArrayList<>();
+	CorrelationId correlationId;
+	TokenEventMessage tokenEventMessage;
+
+	public static final int BAD_REQUEST = 400;
+	public static final int OK = 200;
 
 	public RequestTokenSteps() {
 	}
@@ -54,12 +58,18 @@ public class RequestTokenSteps {
 
 	@When("a registered customer with id {string} requests {int} tokens and an event RequestTokensEvent {string} is sent")
 	public void a_registered_customer_with_id_requests_tokens_and_an_event_request_tokens_event_is_sent(String uuid, Integer int1, String RequestTokensEvent) {
-		tokenService.handleRequestTokensEvent(new Event(RequestTokensEvent, new Object[] {uuid, int1}));
+		correlationId = CorrelationId.randomId();
+		tokenEventMessage = new TokenEventMessage();
+		tokenEventMessage.setCustomerId(UUID.fromString(uuid));
+		tokenEventMessage.setRequestedTokens(int1);
+		tokenService.handleRequestTokensEvent(new Event(RequestTokensEvent, new Object[] { correlationId, tokenEventMessage}));
 	}
 
 	@Then("a response RequestTokensResponse {string} is sent and throws and exception {string}")
-	public void a_response_request_tokens_response_is_sent_and_throws_and_exception(String RequestTokensResponse, String exception) {
-		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{new Exception(exception)}));
+	public void a_response_request_tokens_response_is_sent_and_throws_and_exception(String RequestTokensResponse, String exceptionMessage) {
+		tokenEventMessage.setRequestResponseCode(BAD_REQUEST);
+		tokenEventMessage.setExceptionMessage(exceptionMessage);
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{ correlationId, tokenEventMessage}));
 	}
 
 	@Given("an existing registered customer with id {string} with {int} or less active tokens")
@@ -75,7 +85,11 @@ public class RequestTokenSteps {
 
 	@When("a registered customer with id {string} requests {int} tokens an event RequestTokensEvent {string} is sent")
 	public void a_registered_customer_with_id_requests_tokens_an_event_request_tokens_event_is_sent(String uuid, Integer int1, String RequestTokensEvent) {
-		tokenService.handleRequestTokensEvent(new Event(RequestTokensEvent, new Object[] {uuid, int1}));
+		correlationId = CorrelationId.randomId();
+		tokenEventMessage = new TokenEventMessage();
+		tokenEventMessage.setCustomerId(UUID.fromString(uuid));
+		tokenEventMessage.setRequestedTokens(int1);
+		tokenService.handleRequestTokensEvent(new Event(RequestTokensEvent, new Object[] { correlationId, tokenEventMessage}));
 	}
 
 	@Then("a response RequestTokensResponse {string} is sent containing a list with {int} new tokens")
@@ -84,8 +98,11 @@ public class RequestTokenSteps {
 		for (int i = 0; i < int1; i++) {
 			Token newToken = new Token(UUID.randomUUID(), true);
 			receivedTokensList.add(newToken);	  
-			}
-		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{receivedTokensList.size()}));
+		}
+
+		tokenEventMessage.setCreatedTokens(receivedTokensList.size());
+		tokenEventMessage.setRequestResponseCode(OK);
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{ correlationId, tokenEventMessage}));
 	}
 
 	@Then("a customer with id {string} has {int} active tokens")
@@ -94,8 +111,10 @@ public class RequestTokenSteps {
 	}
 
 	@Then("a response RequestTokensResponse {string} is sent and throws an exception {string}")
-	public void a_response_request_tokens_response_is_sent_and_throws_an_exception(String RequestTokensResponse, String exception) {
-		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{new Exception(exception)}));
+	public void a_response_request_tokens_response_is_sent_and_throws_an_exception(String RequestTokensResponse, String exceptionMessage) {
+		tokenEventMessage.setRequestResponseCode(BAD_REQUEST);
+		tokenEventMessage.setExceptionMessage(exceptionMessage);
+		verify(queue).publish(new Event(RequestTokensResponse, new Object[]{ correlationId, tokenEventMessage}));
 	}
 
 
