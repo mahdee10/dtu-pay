@@ -28,7 +28,7 @@ public class Event implements Serializable {
 		return type;
 	}
 	
-	private Object[] getArguments() {
+	public Object[] getArguments() {
 		return arguments;
 	}
 	

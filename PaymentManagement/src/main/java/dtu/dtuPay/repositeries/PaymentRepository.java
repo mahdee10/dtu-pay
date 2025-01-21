@@ -16,7 +16,9 @@ public class PaymentRepository {
     private HashMap<UUID, List<UUID>> merchantPayments = new HashMap<>();;
 
     private PaymentRepository() {
+
         this.payments = new HashMap<>();
+
     }
 
     public static PaymentRepository getInstance() {
@@ -40,19 +42,31 @@ public class PaymentRepository {
     }
 
     public List<Payment> getCustomerPayments(UUID customerId) {
-        List<UUID> customerPaymnetsIdList = customerPayments.get(customerId);
-        List<Payment> paymentList = getPayments().stream().filter(
-                payment -> customerPaymnetsIdList.contains(payment.getId())
-        ).toList();
+        List<UUID> customerPaymentsIdList = customerPayments.get(customerId);
+
+        if (customerPaymentsIdList == null || customerPaymentsIdList.isEmpty()) {
+            System.err.println("No payment records found for customer ID: " + customerId);
+            return new ArrayList<>();
+        }
+
+        List<Payment> paymentList = getPayments().stream()
+                .filter(payment -> customerPaymentsIdList.contains(payment.getId()))
+                .toList();
 
         return new ArrayList<>(paymentList);
     }
 
     public List<Payment> getMerchantPayments(UUID merchantId) {
-        List<UUID> merchantPaymnetsIdList = merchantPayments.get(merchantId);
-        List<Payment> paymentList = getPayments().stream().filter(
-                payment -> merchantPaymnetsIdList.contains(payment.getId())
-        ).toList();
+        List<UUID> merchantPaymentsIdList = merchantPayments.get(merchantId);
+
+        if (merchantPaymentsIdList == null || merchantPaymentsIdList.isEmpty()) {
+            System.err.println("No payment records found for merchant ID: " + merchantId);
+            return new ArrayList<>();
+        }
+
+        List<Payment> paymentList = getPayments().stream()
+                .filter(payment -> merchantPaymentsIdList.contains(payment.getId()))
+                .toList();
 
         return new ArrayList<>(paymentList);
     }
