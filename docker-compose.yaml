@@ -63,7 +63,7 @@ services:
       retries: 3
 
 #  reporting-management-service:
-#    build: ./ReportingManagement
+#    build: ./ReportingManagementa
 #    image: reporting-management-service
 #    container_name: reporting-management-service
 #    ports:
@@ -75,3 +75,7 @@ services:
 #      interval: 30s
 #      timeout: 30s
 #      retries: 3
+
+networks:
+  dtu-pay-network:
+    driver: bridge
