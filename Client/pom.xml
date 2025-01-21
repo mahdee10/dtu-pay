@@ -32,13 +32,6 @@
 			<type>pom</type>
 		</dependency>
 
-		<dependency>
-			<groupId>jakarta.xml.ws</groupId>
-			<artifactId>jakarta.xml.ws-api</artifactId>
-			<version>3.0.0</version>
-			<scope>provided</scope> <!-- Provided if running on a server with Jakarta support -->
-		</dependency>
-
 		<!-- General REST framework -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
