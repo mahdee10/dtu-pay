@@ -1,4 +1,4 @@
-package controllers;
+package resources;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -11,7 +11,7 @@ import services.PaymentService;
 
 
 @Path("payments")
-public class PaymentController {
+public class PaymentResource {
     PaymentService service = PaymentService.getInstance();
 
     @POST

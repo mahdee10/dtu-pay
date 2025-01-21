@@ -1,7 +1,6 @@
 
 package dtu.ws.fastmoney;
 
-import dtu.ws.fastmoney.BankServiceException;
 import jakarta.xml.ws.WebFault;
 
 
@@ -20,14 +19,14 @@ public class BankServiceException_Exception
      * Java type that goes as soapenv:Fault detail element.
      * 
      */
-    private dtu.ws.fastmoney.BankServiceException faultInfo;
+    private BankServiceException faultInfo;
 
     /**
      * 
      * @param faultInfo
      * @param message
      */
-    public BankServiceException_Exception(String message, dtu.ws.fastmoney.BankServiceException faultInfo) {
+    public BankServiceException_Exception(String message, BankServiceException faultInfo) {
         super(message);
         this.faultInfo = faultInfo;
     }
@@ -38,7 +37,7 @@ public class BankServiceException_Exception
      * @param cause
      * @param message
      */
-    public BankServiceException_Exception(String message, dtu.ws.fastmoney.BankServiceException faultInfo, Throwable cause) {
+    public BankServiceException_Exception(String message, BankServiceException faultInfo, Throwable cause) {
         super(message, cause);
         this.faultInfo = faultInfo;
     }

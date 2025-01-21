@@ -1,5 +1,6 @@
-package dtu.dtuPay;
+package dtu;
 
+import dtu.dtuPay.services.BankServiceImplementation;
 import dtu.dtuPay.services.PaymentService;
 import messaging.implementations.RabbitMqQueue;
 
@@ -10,6 +11,7 @@ public class StartUp {
 
     private void startUp() throws Exception {
         var mq = new RabbitMqQueue("localhost");
-        new PaymentService(mq);
+        BankServiceImplementation bankService = new BankServiceImplementation();
+        new PaymentService(mq, bankService);
     }
 }

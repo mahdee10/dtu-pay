@@ -58,7 +58,7 @@ public class TokenService {
     }
 
     public void handleCustomerTokenRequest(Event e) {
-        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
     	 UUID uuid = e.getArgument(1, UUID.class);
     	 Token token = tokenRepository.getTokens(uuid).stream().findAny().orElse(null);
     	 if(token == null) {
@@ -76,7 +76,7 @@ public class TokenService {
     public void handleRequestTokensEvent(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
     	UUID uuid = e.getArgument(1, UUID.class);
-    	Integer requestedTokens = e.getArgument(1, Integer.class);
+    	Integer requestedTokens = e.getArgument(2, Integer.class);
     	List<Token> tokenList = tokenRepository.getTokens(uuid);
     	
     	if(requestedTokens <= 5) {

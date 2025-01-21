@@ -2,8 +2,10 @@ package steps;
 
 import com.google.gson.Gson;
 import dtu.dtuPay.models.Payment;
+import dtu.dtuPay.models.PaymentRequestDto;
 import dtu.dtuPay.repositeries.PaymentRepository;
 import dtu.dtuPay.models.CorrelationId;
+import dtu.dtuPay.services.BankServiceImplementation;
 import dtu.dtuPay.services.PaymentService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import io.cucumber.java.en.Given;
@@ -15,12 +17,12 @@ import messaging.MessageQueue;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class PaymentSteps {
     private MessageQueue queue = mock(MessageQueue.class);
-    private PaymentService service = new PaymentService(queue);
+    private BankServiceImplementation bankService = mock(BankServiceImplementation.class);
+    private PaymentService service = new PaymentService(queue, bankService);
     private PaymentRepository repository = PaymentRepository.getInstance();
     private UUID merchantId;
     private UUID customerToken;
@@ -39,7 +41,36 @@ public class PaymentSteps {
         merchantId = UUID.randomUUID();
         amount = 20.0;
 
-        Event event = new Event(eventName, new Object[] { correlationId, customerToken, merchantId, amount });
+        PaymentRequestDto paymentDto = new PaymentRequestDto(customerToken, merchantId, amount);
+        Event event = new Event(eventName, new Object[] { correlationId, paymentDto });
+
+        String validCustomerBankAccount = String.valueOf(UUID.randomUUID());
+        String validMerchantBankAccount = String.valueOf(UUID.randomUUID());
+
+        // Stub queue.publish to simulate event handling
+        doAnswer(invocation -> {
+            Event publishedEvent = invocation.getArgument(0, Event.class);
+            CorrelationId validationCorrelationId = publishedEvent.getArgument(0, CorrelationId.class);
+
+            switch (publishedEvent.getType()) {
+                case "ValidateMerchantAccountRequested":
+                    service.bankAccountCorrelations.get(validationCorrelationId).complete(validMerchantBankAccount);
+                    break;
+                case "GetCustomerBankAccountRequested":
+                    service.bankAccountCorrelations.get(validationCorrelationId).complete(validCustomerBankAccount);
+                    break;
+                case "TokenValidationRequest":
+                    UUID customerId = UUID.randomUUID();
+                    service.tokenValidationCorrelations.get(validationCorrelationId).complete(customerId);
+                    break;
+                case "UseTokenRequest":
+                    service.correlations.get(validationCorrelationId).complete(true);
+                    break;
+            }
+
+            return null;
+        }).when(queue).publish(any(Event.class));
+
         service.handlePaymentRequested(event);
     }
 

@@ -1,11 +1,10 @@
 
 package dtu.ws.fastmoney;
 
+import javax.xml.namespace.QName;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlElementDecl;
 import jakarta.xml.bind.annotation.XmlRegistry;
-
-import javax.xml.namespace.QName;
 
 
 /**
@@ -45,11 +44,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.CreateAccountWithBalance }
+     * Create an instance of {@link CreateAccountWithBalance }
      * 
      */
-    public dtu.ws.fastmoney.CreateAccountWithBalance createCreateAccountWithBalance() {
-        return new dtu.ws.fastmoney.CreateAccountWithBalance();
+    public CreateAccountWithBalance createCreateAccountWithBalance() {
+        return new CreateAccountWithBalance();
     }
 
     /**
@@ -61,11 +60,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.GetAccount }
+     * Create an instance of {@link GetAccount }
      * 
      */
-    public dtu.ws.fastmoney.GetAccount createGetAccount() {
-        return new dtu.ws.fastmoney.GetAccount();
+    public GetAccount createGetAccount() {
+        return new GetAccount();
     }
 
     /**
@@ -93,11 +92,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.RetireAccount }
+     * Create an instance of {@link RetireAccount }
      * 
      */
-    public dtu.ws.fastmoney.RetireAccount createRetireAccount() {
-        return new dtu.ws.fastmoney.RetireAccount();
+    public RetireAccount createRetireAccount() {
+        return new RetireAccount();
     }
 
     /**
@@ -109,34 +108,34 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.TransferMoneyFromTo }
+     * Create an instance of {@link TransferMoneyFromTo }
      * 
      */
-    public dtu.ws.fastmoney.TransferMoneyFromTo createTransferMoneyFromTo() {
-        return new dtu.ws.fastmoney.TransferMoneyFromTo();
+    public TransferMoneyFromTo createTransferMoneyFromTo() {
+        return new TransferMoneyFromTo();
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.TransferMoneyFromToResponse }
+     * Create an instance of {@link TransferMoneyFromToResponse }
      * 
      */
-    public dtu.ws.fastmoney.TransferMoneyFromToResponse createTransferMoneyFromToResponse() {
-        return new dtu.ws.fastmoney.TransferMoneyFromToResponse();
+    public TransferMoneyFromToResponse createTransferMoneyFromToResponse() {
+        return new TransferMoneyFromToResponse();
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.BankServiceException }
+     * Create an instance of {@link BankServiceException }
      * 
      */
-    public dtu.ws.fastmoney.BankServiceException createBankServiceException() {
-        return new dtu.ws.fastmoney.BankServiceException();
+    public BankServiceException createBankServiceException() {
+        return new BankServiceException();
     }
 
     /**
-     * Create an instance of {@link dtu.ws.fastmoney.Account }
+     * Create an instance of {@link Account }
      * 
      */
-    public dtu.ws.fastmoney.Account createAccount() {
+    public Account createAccount() {
         return new Account();
     }
 
@@ -157,16 +156,16 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.CreateAccountWithBalance }{@code >}
+     * Create an instance of {@link JAXBElement }{@code <}{@link CreateAccountWithBalance }{@code >}
      * 
      * @param value
      *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.CreateAccountWithBalance }{@code >}
+     *     the new instance of {@link JAXBElement }{@code <}{@link CreateAccountWithBalance }{@code >}
      */
     @XmlElementDecl(namespace = "http://fastmoney.ws.dtu/", name = "createAccountWithBalance")
-    public JAXBElement<dtu.ws.fastmoney.CreateAccountWithBalance> createCreateAccountWithBalance(dtu.ws.fastmoney.CreateAccountWithBalance value) {
-        return new JAXBElement<dtu.ws.fastmoney.CreateAccountWithBalance>(_CreateAccountWithBalance_QNAME, CreateAccountWithBalance.class, null, value);
+    public JAXBElement<CreateAccountWithBalance> createCreateAccountWithBalance(CreateAccountWithBalance value) {
+        return new JAXBElement<CreateAccountWithBalance>(_CreateAccountWithBalance_QNAME, CreateAccountWithBalance.class, null, value);
     }
 
     /**
@@ -183,16 +182,16 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.GetAccount }{@code >}
+     * Create an instance of {@link JAXBElement }{@code <}{@link GetAccount }{@code >}
      * 
      * @param value
      *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.GetAccount }{@code >}
+     *     the new instance of {@link JAXBElement }{@code <}{@link GetAccount }{@code >}
      */
     @XmlElementDecl(namespace = "http://fastmoney.ws.dtu/", name = "getAccount")
-    public JAXBElement<dtu.ws.fastmoney.GetAccount> createGetAccount(dtu.ws.fastmoney.GetAccount value) {
-        return new JAXBElement<dtu.ws.fastmoney.GetAccount>(_GetAccount_QNAME, GetAccount.class, null, value);
+    public JAXBElement<GetAccount> createGetAccount(GetAccount value) {
+        return new JAXBElement<GetAccount>(_GetAccount_QNAME, GetAccount.class, null, value);
     }
 
     /**
@@ -235,16 +234,16 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.RetireAccount }{@code >}
+     * Create an instance of {@link JAXBElement }{@code <}{@link RetireAccount }{@code >}
      * 
      * @param value
      *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.RetireAccount }{@code >}
+     *     the new instance of {@link JAXBElement }{@code <}{@link RetireAccount }{@code >}
      */
     @XmlElementDecl(namespace = "http://fastmoney.ws.dtu/", name = "retireAccount")
-    public JAXBElement<dtu.ws.fastmoney.RetireAccount> createRetireAccount(dtu.ws.fastmoney.RetireAccount value) {
-        return new JAXBElement<dtu.ws.fastmoney.RetireAccount>(_RetireAccount_QNAME, RetireAccount.class, null, value);
+    public JAXBElement<RetireAccount> createRetireAccount(RetireAccount value) {
+        return new JAXBElement<RetireAccount>(_RetireAccount_QNAME, RetireAccount.class, null, value);
     }
 
     /**
@@ -261,42 +260,42 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.TransferMoneyFromTo }{@code >}
+     * Create an instance of {@link JAXBElement }{@code <}{@link TransferMoneyFromTo }{@code >}
      * 
      * @param value
      *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.TransferMoneyFromTo }{@code >}
+     *     the new instance of {@link JAXBElement }{@code <}{@link TransferMoneyFromTo }{@code >}
      */
     @XmlElementDecl(namespace = "http://fastmoney.ws.dtu/", name = "transferMoneyFromTo")
-    public JAXBElement<dtu.ws.fastmoney.TransferMoneyFromTo> createTransferMoneyFromTo(dtu.ws.fastmoney.TransferMoneyFromTo value) {
-        return new JAXBElement<dtu.ws.fastmoney.TransferMoneyFromTo>(_TransferMoneyFromTo_QNAME, TransferMoneyFromTo.class, null, value);
+    public JAXBElement<TransferMoneyFromTo> createTransferMoneyFromTo(TransferMoneyFromTo value) {
+        return new JAXBElement<TransferMoneyFromTo>(_TransferMoneyFromTo_QNAME, TransferMoneyFromTo.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.TransferMoneyFromToResponse }{@code >}
+     * Create an instance of {@link JAXBElement }{@code <}{@link TransferMoneyFromToResponse }{@code >}
      * 
      * @param value
      *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.TransferMoneyFromToResponse }{@code >}
+     *     the new instance of {@link JAXBElement }{@code <}{@link TransferMoneyFromToResponse }{@code >}
      */
     @XmlElementDecl(namespace = "http://fastmoney.ws.dtu/", name = "transferMoneyFromToResponse")
-    public JAXBElement<dtu.ws.fastmoney.TransferMoneyFromToResponse> createTransferMoneyFromToResponse(dtu.ws.fastmoney.TransferMoneyFromToResponse value) {
-        return new JAXBElement<dtu.ws.fastmoney.TransferMoneyFromToResponse>(_TransferMoneyFromToResponse_QNAME, TransferMoneyFromToResponse.class, null, value);
+    public JAXBElement<TransferMoneyFromToResponse> createTransferMoneyFromToResponse(TransferMoneyFromToResponse value) {
+        return new JAXBElement<TransferMoneyFromToResponse>(_TransferMoneyFromToResponse_QNAME, TransferMoneyFromToResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.BankServiceException }{@code >}
+     * Create an instance of {@link JAXBElement }{@code <}{@link BankServiceException }{@code >}
      * 
      * @param value
      *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link dtu.ws.fastmoney.BankServiceException }{@code >}
+     *     the new instance of {@link JAXBElement }{@code <}{@link BankServiceException }{@code >}
      */
     @XmlElementDecl(namespace = "http://fastmoney.ws.dtu/", name = "BankServiceException")
-    public JAXBElement<dtu.ws.fastmoney.BankServiceException> createBankServiceException(dtu.ws.fastmoney.BankServiceException value) {
-        return new JAXBElement<dtu.ws.fastmoney.BankServiceException>(_BankServiceException_QNAME, BankServiceException.class, null, value);
+    public JAXBElement<BankServiceException> createBankServiceException(BankServiceException value) {
+        return new JAXBElement<BankServiceException>(_BankServiceException_QNAME, BankServiceException.class, null, value);
     }
 
 }

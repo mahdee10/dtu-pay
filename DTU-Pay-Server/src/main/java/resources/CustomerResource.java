@@ -1,4 +1,4 @@
-package controllers;
+package resources;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -10,7 +10,7 @@ import services.customer.CustomerServiceFactory;
 import java.util.UUID;
 
 @Path("customers")
-public class CustomerController {
+public class CustomerResource {
     CustomerService service = new CustomerServiceFactory().getService();
 
     @POST

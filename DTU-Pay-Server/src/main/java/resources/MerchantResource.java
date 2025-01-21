@@ -1,4 +1,4 @@
-package controllers;
+package resources;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -10,7 +10,7 @@ import services.merchant.MerchantServiceFactory;
 import java.util.UUID;
 
 @Path("merchants")
-public class MerchantController {
+public class MerchantResource {
     MerchantService service = new MerchantServiceFactory().getService();
 
     @POST

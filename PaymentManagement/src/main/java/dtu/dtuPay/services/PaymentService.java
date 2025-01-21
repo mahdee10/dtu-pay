@@ -6,7 +6,6 @@ import dtu.dtuPay.models.Payment;
 import dtu.dtuPay.models.PaymentRequestDto;
 import dtu.dtuPay.repositeries.PaymentRepository;
 import dtu.ws.fastmoney.BankServiceException_Exception;
-import lombok.SneakyThrows;
 import messaging.Event;
 import messaging.MessageQueue;
 
@@ -42,13 +41,13 @@ public class PaymentService {
 
     private MessageQueue queue;
     private PaymentRepository paymentRepository = PaymentRepository.getInstance();
-    BankServiceImplementation bankService = new BankServiceImplementation();
-    private Map<CorrelationId, CompletableFuture<Boolean>> correlations = new ConcurrentHashMap<>();
-    private Map<CorrelationId, CompletableFuture<String>> correlationsAccounts = new ConcurrentHashMap<>();
-    private Map<CorrelationId, CompletableFuture<UUID>> tokenValidationCorrelations = new ConcurrentHashMap<>();
-    private Map<CorrelationId, CompletableFuture<String>> customerBankAccountCorrelations = new ConcurrentHashMap<>();
+    BankServiceImplementation bankService;
+    public Map<CorrelationId, CompletableFuture<Boolean>> correlations = new ConcurrentHashMap<>();
+    public Map<CorrelationId, CompletableFuture<UUID>> tokenValidationCorrelations = new ConcurrentHashMap<>();
+    public Map<CorrelationId, CompletableFuture<String>> bankAccountCorrelations = new ConcurrentHashMap<>();
 
-    public PaymentService(MessageQueue mq) {
+    public PaymentService(MessageQueue mq, BankServiceImplementation bankService) {
+        this.bankService =  bankService;
         this.queue = mq;
         // Get payments
         this.queue.addHandler(GET_PAYMENTS_REQUESTED, this::handleGetPaymentsRequested);
@@ -106,13 +105,13 @@ public class PaymentService {
         String merchantBankAccount = ev.getArgument(1, String.class);
         boolean isValid = ev.getArgument(2, boolean.class);
 
-        correlationsAccounts.get(correlationId).complete(isValid ? merchantBankAccount : null);
+        bankAccountCorrelations.get(correlationId).complete(isValid ? merchantBankAccount : null);
     }
 
     public String validateMerchantAccount(UUID merchantId) {
         CorrelationId merchantValidationCorrelationId = CorrelationId.randomId();
         CompletableFuture<String> futureMerchantValidation = new CompletableFuture<>();
-        correlationsAccounts.put(merchantValidationCorrelationId, futureMerchantValidation);
+        bankAccountCorrelations.put(merchantValidationCorrelationId, futureMerchantValidation);
 
         Event merchantAccountValidationEvent = new Event(VALIDATE_MERCHANT_ACCOUNT_REQUESTED,
                 new Object[] { merchantValidationCorrelationId, merchantId });
@@ -126,17 +125,17 @@ public class PaymentService {
         String customerBankAccount = e.getArgument(2, String.class);
 
         if (customerBankAccount.isEmpty()) {
-            customerBankAccountCorrelations.get(correlationId).complete(null);
+            bankAccountCorrelations.get(correlationId).complete(null);
             return;
         }
 
-        customerBankAccountCorrelations.get(correlationId).complete(customerBankAccount);
+        bankAccountCorrelations.get(correlationId).complete(customerBankAccount);
     }
 
     public String getCustomerBankAccount(UUID customerId) {
         CorrelationId customerGetBankAccountCorrelationId = CorrelationId.randomId();
         CompletableFuture<String> futureGetCustomerBankAccount = new CompletableFuture<>();
-        customerBankAccountCorrelations.put(customerGetBankAccountCorrelationId, futureGetCustomerBankAccount);
+        bankAccountCorrelations.put(customerGetBankAccountCorrelationId, futureGetCustomerBankAccount);
 
         Event customerTokenValidationEvent = new Event(GET_CUSTOMER_BANK_ACCOUNT_REQUESTED,
                 new Object[] { customerGetBankAccountCorrelationId, customerId });
