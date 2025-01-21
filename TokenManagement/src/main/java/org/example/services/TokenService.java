@@ -1,6 +1,6 @@
 package org.example.services;
 
-import io.cucumber.java.an.E;
+import io.cucumber.java.es.E;
 import messaging.Event;
 import messaging.MessageQueue;
 import org.example.models.CorrelationId;
@@ -46,7 +46,7 @@ public class TokenService {
         if (!isValid) {
             boolean exists = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(tokenUUID));
             if (!exists) {
-                Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[]{ correlationId, isValid,  "Token not found." });
+                Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[]{ correlationId, "Token not found."});
                 queue.publish(event);
                 return;
             }
@@ -63,7 +63,7 @@ public class TokenService {
     	 Token token = tokenRepository.getTokens(uuid).stream().findAny().orElse(null);
     	 if(token == null) {
     		 Event event = new Event(CUSTOMER_TOKENS_RETURNED, new Object[] {
-                     correlationId, new Exception("You have no more tokens. Request more tokens.")
+                     correlationId, "You have no more tokens. Request more tokens."
              });
              queue.publish(event);
              return;
@@ -93,13 +93,13 @@ public class TokenService {
                 return;
     		}
     		
-    		Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] { correlationId, new Exception("Too many active tokens") });
+    		Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] { correlationId, "Too many active tokens" });
             queue.publish(event);
             return;
     		
     	}
 
-        Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] { correlationId, new Exception("Too many tokens requested") });
+        Event event = new Event(REQUEST_TOKENS_RESPONSE, new Object[] { correlationId, "Too many tokens requested"});
         queue.publish(event);
     }
 
@@ -109,7 +109,7 @@ public class TokenService {
         try {
             tokenRepository.useToken(e.getArgument(1, UUID.class));
         } catch (Exception exception) {
-           event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, new Exception(exception.getMessage()) });
+           event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, exception.getMessage()});
         }
         queue.publish(event);
     }

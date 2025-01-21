@@ -85,14 +85,19 @@ public class TokenRepository {
         return tokens;
     }
 
-    public UUID getCustomerId(UUID customerToken) {
-        UUID customerId = null;
+    public UUID getCustomerId(UUID tokenUUID) {
+        UUID userUUID = null;
+
         for  (HashMap.Entry<UUID, List<Token>> entry  : validTokens.entrySet()) {
-            if (entry.getValue().contains(customerToken)) {
-                customerId = entry.getKey();
+            List<Token> tokens = entry.getValue();
+
+            Token token = tokens.stream().filter(t -> t.getUuid().equals(tokenUUID)).findFirst().orElse(null);
+            if (token != null) {
+                userUUID = entry.getKey();
                 break;
             }
         }
-        return customerId;
+
+        return userUUID;
     }
 }
