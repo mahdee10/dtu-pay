@@ -12,8 +12,12 @@ public class PaymentService {
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");
     IPaymentService service = baseURL.proxy(IPaymentService.class);
 
-    public boolean pay(PaymentRequestDto payment) {
+    public boolean pay(PaymentRequestDto payment) throws Exception {
         Response response = service.pay(payment);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(Boolean.class);
     }

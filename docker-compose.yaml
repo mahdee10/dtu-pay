@@ -60,8 +60,6 @@ services:
     container_name: reporting-management-service
     ports:
       - "8084:8080"
-    networks:
-       - dtu-pay-network
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s

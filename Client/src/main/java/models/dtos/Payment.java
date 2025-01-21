@@ -1,4 +1,4 @@
-package org.dtu.reporting.models;
+package models.dtos;
 
 import java.util.UUID;
 
@@ -8,21 +8,7 @@ public class Payment {
     private UUID merchantId;
     private double amount;
 
-    public Payment(UUID customerToken, UUID merchantId, double amount) {
-        this.customerToken = customerToken;
-        this.merchantId = merchantId;
-        this.amount = amount;
-    }
-
     // Getters and Setters
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public UUID getCustomerToken() {
         return customerToken;
     }
@@ -45,15 +31,5 @@ public class Payment {
 
     public void setAmount(double amount) {
         this.amount = amount;
-    }
-
-    @Override
-    public String toString() {
-        return "Payment{" +
-                "id=" + id +
-                ", customerToken=" + customerToken +
-                ", merchantId=" + merchantId +
-                ", amount=" + amount +
-                '}';
     }
 }

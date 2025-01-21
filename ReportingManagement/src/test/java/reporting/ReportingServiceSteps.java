@@ -1,90 +1,129 @@
 package reporting;
 
 import io.cucumber.java.en.*;
+import messaging.Event;
+import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
+import org.dtu.reporting.models.CorrelationId;
 import org.dtu.reporting.models.Payment;
+import org.dtu.reporting.models.PaymentEventMessage;
+import org.dtu.reporting.models.ReportingEventMessage;
 import org.dtu.reporting.services.ReportingService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class ReportingServiceSteps {
 
-    private ReportingService reportingService;
-    private List<Payment> payments;
+    public static final int BAD_REQUEST = 400;
+    public static final int OK = 200;
 
-    @Given("the reporting service is running")
-    public void the_reporting_service_is_running() {
-        var mq = new RabbitMqQueue("localhost");
-        reportingService = new ReportingService(mq);
+    private MessageQueue queue = mock(MessageQueue.class);
+    private ReportingService reportingService = new ReportingService(queue);
+    private UUID customerId;
+    private UUID merchantId;
+    private CorrelationId correlationId;
+    ReportingEventMessage eventMessage;
+    private List<Payment> expectedPaymentList;
+
+    @Given("a list of payments are present in the payment repository for customer with ID {string}")
+    public void aListOfPaymentsArePresentInThePaymentRepositoryForCustomerWithID(String customerIdString) {
+        customerId = UUID.fromString(customerIdString);
+        aListOfPaymentsArePresentInThePaymentRepository();
     }
 
-    @When("I request all payments")
-    public void i_request_all_payments() throws InterruptedException {
-        reportingService.requestPayments();
-        Thread.sleep(3000);
-        payments = reportingService.getAllPayments();
+    @Given("a list of payments are present in the payment repository for merchant with ID {string}")
+    public void aListOfPaymentsArePresentInThePaymentRepositoryForMerchantWithID(String merchantIdString) {
+        merchantId = UUID.fromString(merchantIdString);
+        aListOfPaymentsArePresentInThePaymentRepository();
     }
 
-    @Then("I should see all payments stored in the repository")
-    public void i_should_see_all_payments_stored_in_the_repository() {
-        assertNotNull(payments, "Payments list should not be null.");
-        assertFalse(payments.isEmpty(), "Payments list should not be empty.");
-        System.out.println("All Payments:");
-        payments.forEach(System.out::println);
+    @Given("a list of payments are present in the payment repository")
+    public void aListOfPaymentsArePresentInThePaymentRepository() {
+        expectedPaymentList = new ArrayList<>(){};
+        customerId = customerId == null ? UUID.randomUUID() : customerId;
+        merchantId = merchantId == null ? UUID.randomUUID() : merchantId;
+
+        for (int i = 0; i < 3; i++) {
+            UUID customerToken = UUID.randomUUID();
+            Payment payment = new Payment(customerToken, merchantId, 10 + i);
+            expectedPaymentList.add(payment);
+        }
+
+        // Stub queue.publish to simulate event handling
+        doAnswer(invocation -> {
+            Event publishedEvent = invocation.getArgument(0, Event.class);
+            CorrelationId validationCorrelationId = publishedEvent.getArgument(0, CorrelationId.class);
+
+            PaymentEventMessage paymentEventMessage;
+
+            switch (publishedEvent.getType()) {
+                case "GetPaymentsRequested":
+                    paymentEventMessage = new PaymentEventMessage();
+                    paymentEventMessage.setRequestResponseCode(OK);
+                    paymentEventMessage.setPaymentList(expectedPaymentList);
+                    reportingService.paymentCorrelations.get(validationCorrelationId).complete(paymentEventMessage);
+                    break;
+                case "GetCustomerPaymentsRequested":
+                    paymentEventMessage = new PaymentEventMessage();
+                    paymentEventMessage.setRequestResponseCode(OK);
+                    paymentEventMessage.setPaymentList(expectedPaymentList);
+                    paymentEventMessage.setCustomerId(customerId);
+                    reportingService.paymentCorrelations.get(validationCorrelationId).complete(paymentEventMessage);
+                    break;
+                case "GetMerchantPaymentsRequested":
+                    paymentEventMessage = new PaymentEventMessage();
+                    paymentEventMessage.setRequestResponseCode(OK);
+                    paymentEventMessage.setPaymentList(expectedPaymentList);
+                    paymentEventMessage.setMerchantId(merchantId);
+                    reportingService.paymentCorrelations.get(validationCorrelationId).complete(paymentEventMessage);
+                    break;
+            }
+
+            return null;
+        }).when(queue).publish(any(Event.class));
     }
 
-    @Given("a customer with ID {string} exists")
-    public void a_customer_with_id_exists(String customerId) {
-        UUID.fromString(customerId);
+    @When("{string} event to get all payments is received")
+    public void eventToGetAllPaymentsIsReceived(String eventName) {
+        correlationId = CorrelationId.randomId();
+        eventMessage = new ReportingEventMessage();
+        Event event;
+
+        switch (eventName) {
+            case "ReportingGetPaymentsRequested":
+                event = new Event(eventName, new Object[] { correlationId, eventMessage });
+                reportingService.handleReportingGetPaymentsRequested(event);
+                break;
+            case "ReportingGetCustomerPaymentsRequested":
+                eventMessage.setCustomerId(customerId);
+                event = new Event(eventName, new Object[] { correlationId, eventMessage });
+                reportingService.handleReportingGetCustomerPaymentsRequested(event);
+                break;
+            case "ReportingGetMerchantPaymentsRequested":
+                eventMessage.setMerchantId(merchantId);
+                event = new Event(eventName, new Object[] { correlationId, eventMessage });
+                reportingService.handleReportingGetMerchantPaymentsRequested(event);
+                break;
+        }
     }
 
-    @When("I request payments for the customer")
-    public void i_request_payments_for_the_customer() throws InterruptedException {
-        var customerId = UUID.fromString("7911f9a4-440f-41b5-ae69-1082ddc7be69");
-        reportingService.requestCustomerPayments(customerId);
-        Thread.sleep(3000);
-        payments = reportingService.getCustomerPayments(customerId);
+    @Then("the payments are fetched and the {string} event is sent")
+    public void thePaymentsAreFetchedAndTheEventIsSent(String eventName) {
+        eventMessage.setRequestResponseCode(OK);
+        eventMessage.setPaymentList(expectedPaymentList);
+
+        Event event = new Event(eventName, new Object[] { correlationId, eventMessage });
+        verify(queue).publish(event);
     }
 
-    @Then("I should see payments for the customer stored in the repository")
-    public void i_should_see_payments_for_the_customer_stored_in_the_repository() {
-        assertNotNull(payments, "Payments list should not be null.");
-        assertFalse(payments.isEmpty(), "Payments list should not be empty.");
-        payments.forEach(payment -> assertEquals(
-                UUID.fromString("7911f9a4-440f-41b5-ae69-1082ddc7be69"),
-                payment.getCustomerToken(),
-                "Customer token should match the expected customer ID."
-        ));
-        System.out.println("Customer Payments:");
-        payments.forEach(System.out::println);
-    }
-
-    @Given("a merchant with ID {string} exists")
-    public void a_merchant_with_id_exists(String merchantId) {
-        UUID.fromString(merchantId);
-    }
-
-    @When("I request payments for the merchant")
-    public void i_request_payments_for_the_merchant() throws InterruptedException {
-        var merchantId = UUID.fromString("5a51e254-e9bf-4762-81d7-eeadf10347b6");
-        reportingService.requestMerchantPayments(merchantId);
-        Thread.sleep(3000);
-        payments = reportingService.getMerchantPayments(merchantId);
-    }
-
-    @Then("I should see payments for the merchant stored in the repository")
-    public void i_should_see_payments_for_the_merchant_stored_in_the_repository() {
-        assertNotNull(payments, "Payments list should not be null.");
-        assertFalse(payments.isEmpty(), "Payments list should not be empty.");
-        payments.forEach(payment -> assertEquals(
-                UUID.fromString("5a51e254-e9bf-4762-81d7-eeadf10347b6"),
-                payment.getMerchantId(),
-                "Merchant ID should match the expected merchant ID."
-        ));
-        System.out.println("Merchant Payments:");
-        payments.forEach(System.out::println);
+    @Then("the user gets the list of payments")
+    public void theUserGetsTheListOfPayments() {
+        assertFalse(expectedPaymentList.isEmpty());
     }
 }

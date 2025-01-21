@@ -61,7 +61,7 @@ public class CustomerRegistration {
     }
 
     @Then("the customer is registered with Simple DTU Pay using their bank account")
-    public void the_customer_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+    public void the_customer_is_registered_with_simple_dtu_pay_using_their_bank_account() throws Exception {
         UserRequestDto payloadUser = new UserRequestDto();
         payloadUser.setFirstName(userCustomer.getFirstName());
         payloadUser.setLastName(userCustomer.getLastName());

@@ -14,8 +14,12 @@ public class CustomerService {
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");
     ICustomerServiceClient service = baseURL.proxy(ICustomerServiceClient.class);
 
-    public UUID createCustomer(UserRequestDto user){
+    public UUID createCustomer(UserRequestDto user) throws Exception {
         Response response = service.registerCustomer(user);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(UUID.class);
     }

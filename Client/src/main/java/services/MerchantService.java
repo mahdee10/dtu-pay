@@ -14,8 +14,12 @@ public class MerchantService {
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");
     IMerchantServiceClient service = baseURL.proxy(IMerchantServiceClient.class);
 
-    public UUID createMerchant(UserRequestDto user){
+    public UUID createMerchant(UserRequestDto user) throws Exception {
         Response response = service.postMerchant(user);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(UUID.class);
     }

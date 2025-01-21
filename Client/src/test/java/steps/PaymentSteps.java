@@ -67,7 +67,7 @@ public class PaymentSteps {
     }
 
     @Given("customer is registered with Simple DTU Pay using their bank account")
-    public void customer_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+    public void customer_is_registered_with_simple_dtu_pay_using_their_bank_account() throws Exception {
         UserRequestDto payloadUser = new UserRequestDto();
         payloadUser.setFirstName(userCustomer.getFirstName());
         payloadUser.setLastName(userCustomer.getLastName());
@@ -99,7 +99,7 @@ public class PaymentSteps {
     }
 
     @Given("merchant is registered with Simple DTU Pay using their bank account")
-    public void merchant_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+    public void merchant_is_registered_with_simple_dtu_pay_using_their_bank_account() throws Exception {
         UserRequestDto payloadUser = new UserRequestDto();
         payloadUser.setFirstName(userMerchant.getFirstName());
         payloadUser.setLastName(userMerchant.getLastName());
@@ -123,7 +123,7 @@ public class PaymentSteps {
 
 
     @When("the merchant initiates a payment for {int} kr by the customer")
-    public void the_merchant_initiates_a_payment_for_kr_by_the_customer(Integer amount) {
+    public void the_merchant_initiates_a_payment_for_kr_by_the_customer(Integer amount) throws Exception {
         paymentIsSuccessfull = paymentService.pay(
                 new PaymentRequestDto(customerToken, merchantId, amount)
         );
