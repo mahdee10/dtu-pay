@@ -72,7 +72,7 @@ public class GetTokenSteps {
 
 		userUUID = UUID.fromString(uuid);
 		tokenRepository.addTokens(userUUID, tokenList);
-        assertTrue(tokenRepository.getTokens(userUUID).size() < 1);
+        assertTrue(tokenRepository.getTokens(userUUID).isEmpty());
 	}
 
 	@Then("a response CustomerTokensReturned {string} is sent and the system throws an exception with message {string}")
