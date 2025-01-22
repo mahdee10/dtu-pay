@@ -3,12 +3,11 @@ package reporting;
 import io.cucumber.java.en.*;
 import messaging.Event;
 import messaging.MessageQueue;
-import messaging.implementations.RabbitMqQueue;
-import org.dtu.reporting.models.CorrelationId;
-import org.dtu.reporting.models.Payment;
-import org.dtu.reporting.models.PaymentEventMessage;
-import org.dtu.reporting.models.ReportingEventMessage;
-import org.dtu.reporting.services.ReportingService;
+import dtu.reporting.models.CorrelationId;
+import dtu.reporting.models.Payment;
+import dtu.reporting.models.PaymentEventMessage;
+import dtu.reporting.models.ReportingEventMessage;
+import dtu.reporting.services.ReportingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,7 @@ public class ReportingServiceSteps {
 
             PaymentEventMessage paymentEventMessage;
 
-            switch (publishedEvent.getType()) {
+            switch (publishedEvent.getTopic()) {
                 case "GetPaymentsRequested":
                     paymentEventMessage = new PaymentEventMessage();
                     paymentEventMessage.setRequestResponseCode(OK);
