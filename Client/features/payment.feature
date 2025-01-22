@@ -1,10 +1,10 @@
 Feature: Generate payment
 
   Scenario: Successful Payment
-    Given customer with name "Susan", last name "Baldwin", and CPR "849291-1427"
+    Given customer with name "Susan", last name "Baldwin", and CPR "129291-1427"
     And customer is registered with the bank with an initial balance of 1000.0 kr
     And customer is registered with Simple DTU Pay using their bank account
-    And merchant with name "Daniel", last name "Oliver", and CPR "898297-1647"
+    And merchant with name "Daniel", last name "Oliver", and CPR "192297-1647"
     And merchant is registered with the bank with an initial balance of 1000.0 kr
     And merchant is registered with Simple DTU Pay using their bank account
     And the customer request 1 tokens

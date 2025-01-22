@@ -16,6 +16,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- JAX-WS Maven Plugin for wsimport generation -->
             <plugin>
                 <groupId>com.sun.xml.ws</groupId>
@@ -37,12 +50,32 @@
                     <sourceDestDir>src/main/java</sourceDestDir>
                 </configuration>
             </plugin>
+
+
+            <!-- Ensure main class is defined -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Main-Class>dtu.StartUp</Main-Class>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
     <dependencies>
         <!-- JAX-WS Runtime (com.sun.xml.ws) for web service operations -->
         <!-- SOAP dependencies -->
+        <dependency>
+            <groupId>dk.dtu.hubert</groupId>
+            <artifactId>messaging-utilities</artifactId>
+            <version>3.4.2</version>
+        </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-ri</artifactId>
@@ -87,12 +120,7 @@
             <version>5.5.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>dk.dtu.hubert</groupId>
-            <artifactId>messaging-utilities</artifactId>
-            <version>3.4.2</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>

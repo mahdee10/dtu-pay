@@ -10,7 +10,7 @@ public class StartUp {
     }
 
     private void startUp() throws Exception {
-        var mq = new RabbitMqQueue("localhost");
+        var mq = new RabbitMqQueue("rabbitMq_container");
         BankServiceImplementation bankService = new BankServiceImplementation();
         new PaymentService(mq, bankService);
     }
