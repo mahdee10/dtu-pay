@@ -32,7 +32,9 @@ public class ReportingService {
             return service;
         }
 
-        var mq = new RabbitMqQueue("rabbitMq_container");
+        String hostname = System.getenv("Environment").equalsIgnoreCase("development")
+                ? "localhost" : "rabbitMq_container";
+        var mq = new RabbitMqQueue(hostname);
         service = new ReportingService(mq);
         return service;
     }

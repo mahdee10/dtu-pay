@@ -8,14 +8,8 @@ echo "Building the Maven project..."
 # Ensure that each service's JAR file gets generated
 echo "Building messaging-utilities project..."
 mvn -f ./messaging-utilities-3.4.2/pom.xml clean package
-
 echo "Installing messaging-utilities JAR as a Maven dependency..."
-mvn install:install-file \
-    -Dfile=./messaging-utilities-3.4.2/target/messaging-utilities-3.4.2.jar \
-    -DgroupId=dk.dtu.hubert \
-    -DartifactId=messaging-utilities \
-    -Dversion=3.4.2 \
-    -Dpackaging=jar
+mvn -f ./messaging-utilities-3.4.2/pom.xml clean install
 
 echo "Building DTU-Pay-Server project..."
 mvn -f ./DTU-Pay-Server/pom.xml clean package
