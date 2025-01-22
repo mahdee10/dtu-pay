@@ -16,7 +16,9 @@ public class CustomerResource {
     CustomerService service = CustomerService.getService();
     ReportingService reportingService = ReportingService.getInstance();
 
+
     @POST
+    @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerCustomer(CreateCustomerDto customerRequest) {
@@ -34,7 +36,7 @@ public class CustomerResource {
     }
 
     @DELETE
-    @Path("/{customerId}")
+    @Path("/deregister/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteCustomer(@PathParam("customerId") UUID id) {
         AccountEventMessage eventMessage = service.deregisterCustomer(id);
@@ -54,7 +56,7 @@ public class CustomerResource {
     }
 
     @GET
-    @Path("reports/{customerId}")
+    @Path("/reports/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReport(@PathParam("customerId") UUID customerId) {

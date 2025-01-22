@@ -16,6 +16,7 @@ public class TokenResource {
     TokenService service = TokenService.getInstance();
 
     @POST
+    @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createTokens(TokenRequestDto tokenRequestDto) {

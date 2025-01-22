@@ -23,6 +23,7 @@ public class MerchantResource {
     ReportingService reportingService = ReportingService.getInstance();
 
     @POST
+    @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerMerchant(CreateMerchantDto merchantRequest) {
@@ -41,7 +42,7 @@ public class MerchantResource {
     }
 
     @DELETE
-    @Path("/{merchantId}")
+    @Path("/deregister/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteMerchant(@PathParam("merchantId") UUID id) {
         AccountEventMessage eventMessage = service.deregisterMerchant(id);
@@ -61,7 +62,7 @@ public class MerchantResource {
     }
     
     @GET
-    @Path("reports/{merchantId}")
+    @Path("/reports/{merchantId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMerchantPayments(@PathParam("merchantId") UUID merchantId) {
@@ -81,7 +82,7 @@ public class MerchantResource {
     }
 
     @POST
-    @Path("payment")
+    @Path("/payment")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response paymentRequest(PaymentRequestDto paymentRequest) {
