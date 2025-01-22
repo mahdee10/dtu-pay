@@ -1,11 +1,17 @@
 package resources;
 
 import jakarta.ws.rs.*;
+
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import models.AccountEventMessage;
+import models.PaymentEventMessage;
+import models.ReportingEventMessage;
 import models.dtos.CreateMerchantDto;
+import models.dtos.PaymentRequestDto;
 import services.MerchantService;
+import services.PaymentService;
+
 
 import java.util.UUID;
 
@@ -50,5 +56,48 @@ public class MerchantResource {
                 .build();
 
     }
+    
+    @GET
+    @Path("reports/{merchantId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMerchantPayments(@PathParam("merchantId") UUID merchantId) {
+        ReportingEventMessage eventMessage = service.getAllMerchantPayments(merchantId);
+
+        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(eventMessage.getExceptionMessage())
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+
+        return Response.status(Response.Status.OK)
+                .entity(eventMessage.getPaymentList())
+                .type(MediaType.APPLICATION_JSON)
+                .build();
+    }
+    
+    @Path("/payments")
+    public class PaymentResource {
+        PaymentService service = PaymentService.getInstance();
+
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        public Response paymentRequest(PaymentRequestDto paymentRequest) {
+            PaymentEventMessage eventMessage = service.pay(paymentRequest);
+
+            if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(eventMessage.getExceptionMessage())
+                        .build();
+            }
+
+            return Response.status(Response.Status.OK)
+                    .entity(true)
+                    .build();
+        }
+    }
+
 
 }
