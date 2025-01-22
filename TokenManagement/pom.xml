@@ -54,7 +54,7 @@
         <dependency>
             <groupId>dk.dtu.hubert</groupId>
             <artifactId>messaging-utilities</artifactId>
-            <version>3.4</version>
+            <version>3.4.2</version>
         </dependency>
 
         <!-- Mockito for mocking in tests -->

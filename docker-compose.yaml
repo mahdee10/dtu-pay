@@ -5,6 +5,13 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - dtu-pay-network
+    healthcheck:
+        test: rabbitmq-diagnostics -q ping
+        interval: 15s
+        timeout: 30s
+        retries: 3
 
   dtu-pay:
     build: ./DTU-Pay-Server
@@ -12,11 +19,11 @@ services:
     container_name: dtu-pay
     ports:
       - "8080:8080"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+    networks:
+      - dtu-pay-network
+    depends_on:
+      rabbitMq:
+        condition: service_healthy
 
   account-management-service:
     build: ./AccountManagement
@@ -24,11 +31,11 @@ services:
     container_name: account-management-service
     ports:
       - "8081:8080"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+    networks:
+      - dtu-pay-network
+    depends_on:
+      rabbitMq:
+        condition: service_healthy
 
   token-management-service:
     build: ./TokenManagement
@@ -36,11 +43,11 @@ services:
     container_name: token-management-service
     ports:
       - "8082:8080"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+    networks:
+      - dtu-pay-network
+    depends_on:
+      rabbitMq:
+        condition: service_healthy
 
   payment-management-service:
     build: ./PaymentManagement
@@ -48,20 +55,26 @@ services:
     container_name: payment-management-service
     ports:
       - "8083:8080"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+    networks:
+      - dtu-pay-network
+    depends_on:
+      rabbitMq:
+        condition: service_healthy
 
   reporting-management-service:
     build: ./ReportingManagement
     image: reporting-management-service
     container_name: reporting-management-service
+    restart: on-failure
     ports:
       - "8084:8080"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+    networks:
+      - dtu-pay-network
+    depends_on:
+      rabbitMq:
+        condition: service_healthy
+
+networks:
+  dtu-pay-network:
+    driver: bridge
+
