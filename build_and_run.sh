@@ -48,3 +48,5 @@ echo "Account Management Service: http://localhost:8081/swagger-ui.html"
 echo "Token Management Service: http://localhost:8082/swagger-ui.html"
 echo "Payment Management Service: http://localhost:8083/swagger-ui.html"
 echo "Reporting Management Service: http://localhost:8084/swagger-ui.html"
+
+mvn -f ./Client test
