@@ -34,8 +34,8 @@ mvn -f ./ReportingManagement/pom.xml clean package
 
 # Step 2: Build Docker containers
 echo "Building and running Docker containers..."
-docker-compose build
-docker-compose up -d
+docker compose build
+docker compose up -d
 
 # Step 3: Wait for the services to be ready
 echo "Waiting for services to initialize..."
