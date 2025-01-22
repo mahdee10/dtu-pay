@@ -8,19 +8,20 @@ import java.util.UUID;
 
 @Path("reports")
 public interface IReportingService {
+
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPayments();
 
     @GET
-    @Path("/{customerId}")
+    @Path("/reports/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCustomerPayments(@PathParam("customerId") UUID customerId);
 
     @GET
-    @Path("/{merchantId}")
+    @Path("/reports/{merchantId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMerchantPayments(@PathParam("merchantId") UUID merchantId);

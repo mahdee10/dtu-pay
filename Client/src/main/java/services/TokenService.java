@@ -14,14 +14,22 @@ public class TokenService {
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");
     ITokenService service = baseURL.proxy(ITokenService.class);
 
-    public Integer createTokens(TokenRequestDto tokenRequestDto) {
+    public Integer createTokens(TokenRequestDto tokenRequestDto) throws Exception {
         Response response = service.createTokens(tokenRequestDto);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(Integer.class);
     }
 
-    public UUID getToken(UUID customerId) {
+    public UUID getToken(UUID customerId) throws Exception {
         Response response = service.getToken(customerId);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(UUID.class);
     }

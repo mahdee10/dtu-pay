@@ -7,7 +7,9 @@ import models.dtos.UserRequestDto;
 
 @Path("merchants")
 public interface IMerchantServiceClient {
+
     @POST
+    @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response postMerchant(UserRequestDto user);

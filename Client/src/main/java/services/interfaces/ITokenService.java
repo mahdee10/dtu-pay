@@ -7,10 +7,11 @@ import models.dtos.TokenRequestDto;
 
 import java.util.UUID;
 
-@Path("tokens")
+@Path("customers/tokens")
 public interface ITokenService {
 
     @POST
+    @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createTokens(TokenRequestDto tokenRequestDto);

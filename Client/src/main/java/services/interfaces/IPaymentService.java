@@ -8,10 +8,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import models.dtos.PaymentRequestDto;
 
-@Path("payments")
 public interface IPaymentService {
 
     @POST
+    @Path("merchants/payment")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response pay(PaymentRequestDto paymentRequest);
