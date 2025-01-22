@@ -23,7 +23,7 @@ public class CustomerService {
         }
 
         String environment = System.getenv("Environment");
-        String hostname = !environment.isEmpty() && environment.equalsIgnoreCase("development")
+        String hostname = environment != null && environment.equalsIgnoreCase("development")
                 ? "localhost" : "rabbitMq_container";
         var mq = new RabbitMqQueue(hostname);
         service = new CustomerService(mq);
