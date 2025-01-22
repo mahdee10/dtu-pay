@@ -1,0 +1,9 @@
+services:
+  AccountManagement:
+    image: account
+    build: .
+    networks:
+      - dtuPay
+
+networks:
+  dtuPay:
