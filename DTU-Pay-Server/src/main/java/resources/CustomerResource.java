@@ -4,14 +4,17 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import models.AccountEventMessage;
+import models.ReportingEventMessage;
 import models.dtos.CreateCustomerDto;
 import services.CustomerService;
+import services.ReportingService;
 
 import java.util.UUID;
 
 @Path("customers")
 public class CustomerResource {
     CustomerService service = CustomerService.getService();
+    ReportingService reportingService = ReportingService.getInstance();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -48,6 +51,26 @@ public class CustomerResource {
                 .type(MediaType.APPLICATION_JSON)
                 .build();
 
+    }
+
+    @GET
+    @Path("reports/{customerId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReport(@PathParam("customerId") UUID customerId) {
+        ReportingEventMessage eventMessage = reportingService.getAllCustomerPayments(customerId);
+
+        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(eventMessage.getExceptionMessage())
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+
+        return Response.status(Response.Status.OK)
+                .entity(eventMessage.getPaymentList())
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 
 }

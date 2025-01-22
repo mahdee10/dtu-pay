@@ -11,6 +11,7 @@ import models.dtos.CreateMerchantDto;
 import models.dtos.PaymentRequestDto;
 import services.MerchantService;
 import services.PaymentService;
+import services.ReportingService;
 
 
 import java.util.UUID;
@@ -18,6 +19,8 @@ import java.util.UUID;
 @Path("merchants")
 public class MerchantResource {
     MerchantService service = MerchantService.getService();
+    PaymentService paymentService = PaymentService.getInstance();
+    ReportingService reportingService = ReportingService.getInstance();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -62,7 +65,7 @@ public class MerchantResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMerchantPayments(@PathParam("merchantId") UUID merchantId) {
-        ReportingEventMessage eventMessage = service.getAllMerchantPayments(merchantId);
+        ReportingEventMessage eventMessage = reportingService.getAllMerchantPayments(merchantId);
 
         if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -76,28 +79,22 @@ public class MerchantResource {
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
-    
-    @Path("/payments")
-    public class PaymentResource {
-        PaymentService service = PaymentService.getInstance();
 
-        @POST
-        @Consumes(MediaType.APPLICATION_JSON)
-        @Produces(MediaType.APPLICATION_JSON)
-        public Response paymentRequest(PaymentRequestDto paymentRequest) {
-            PaymentEventMessage eventMessage = service.pay(paymentRequest);
+    @POST
+    @Path("payment")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response paymentRequest(PaymentRequestDto paymentRequest) {
+        PaymentEventMessage eventMessage = paymentService.pay(paymentRequest);
 
-            if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(eventMessage.getExceptionMessage())
-                        .build();
-            }
-
-            return Response.status(Response.Status.OK)
-                    .entity(true)
+        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(eventMessage.getExceptionMessage())
                     .build();
         }
+
+        return Response.status(Response.Status.OK)
+                .entity(true)
+                .build();
     }
-
-
 }

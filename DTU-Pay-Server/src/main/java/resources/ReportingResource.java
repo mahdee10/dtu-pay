@@ -32,24 +32,4 @@ public class ReportingResource {
                 .build();
     }
 
-    @GET
-    @Path("/{customerId}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getCustomerPayments(@PathParam("customerId") UUID customerId) {
-        ReportingEventMessage eventMessage = service.getAllCustomerPayments(customerId);
-
-        if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(eventMessage.getExceptionMessage())
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
-        }
-
-        return Response.status(Response.Status.OK)
-                .entity(eventMessage.getPaymentList())
-                .type(MediaType.APPLICATION_JSON)
-                .build();
-    }
-
 }

@@ -11,7 +11,7 @@ import services.TokenService;
 import java.util.List;
 import java.util.UUID;
 
-@Path("tokens")
+@Path("customers/tokens")
 public class TokenResource {
     TokenService service = TokenService.getInstance();
 
@@ -36,7 +36,7 @@ public class TokenResource {
     @Path("/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getToken(@PathParam("customerId") UUID customerId) {
+    public Response getTokens(@PathParam("customerId") UUID customerId) {
         TokenEventMessage eventMessage = service.getToken(customerId);
 
         if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
