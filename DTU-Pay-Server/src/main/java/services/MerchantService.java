@@ -22,7 +22,7 @@ public class MerchantService {
             return service;
         }
 
-        var mq = new RabbitMqQueue("localhost");
+        var mq = new RabbitMqQueue("rabbitMq_container");
         service = new MerchantService(mq);
         return service;
     }

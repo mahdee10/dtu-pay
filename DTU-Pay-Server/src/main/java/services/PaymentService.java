@@ -33,7 +33,7 @@ public class PaymentService {
             return service;
         }
 
-        var mq = new RabbitMqQueue("localhost");
+        var mq = new RabbitMqQueue("rabbitMq_container");
         service = new PaymentService(mq);
         return service;
     }

@@ -28,7 +28,7 @@ public class TokenService {
             return service;
         }
 
-        var mq = new RabbitMqQueue("localhost");
+        var mq = new RabbitMqQueue("rabbitMq_container");
         service = new TokenService(mq);
         return service;
     }

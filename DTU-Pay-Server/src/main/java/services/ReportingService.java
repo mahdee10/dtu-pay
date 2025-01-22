@@ -32,7 +32,7 @@ public class ReportingService {
             return service;
         }
 
-        var mq = new RabbitMqQueue("localhost");
+        var mq = new RabbitMqQueue("rabbitMq_container");
         service = new ReportingService(mq);
         return service;
     }

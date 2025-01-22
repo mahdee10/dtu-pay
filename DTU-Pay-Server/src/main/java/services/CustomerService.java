@@ -22,7 +22,7 @@ public class CustomerService {
             return service;
         }
 
-        var mq = new RabbitMqQueue("localhost");
+        var mq = new RabbitMqQueue("rabbitMq_container");
         service = new CustomerService(mq);
         return service;
     }
