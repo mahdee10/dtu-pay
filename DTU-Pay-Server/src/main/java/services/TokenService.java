@@ -112,6 +112,12 @@ public class TokenService {
         queue.publish(useTokenEvent);
 
         TokenEventMessage responseEventMessage =  futureUseToken.join();
+        if (responseEventMessage.getRequestResponseCode() != 200) {
+            responseEventMessage.setExceptionMessage(responseEventMessage.getExceptionMessage());
+            responseEventMessage.setRequestResponseCode(BAD_REQUEST);
+
+            return responseEventMessage;
+        }
 
         AccountEventMessage accountMessageEvent = customerService.validateCustomerAccount(responseEventMessage.getCustomerId());
         if (!accountMessageEvent.getIsValidAccount() || accountMessageEvent.getRequestResponseCode() != 200) {

@@ -24,7 +24,7 @@ Feature: Generate payment
     And the customer request 3 tokens
     And the merchant initiates a payment for 10 kr by using the customer token
     When the merchant initiates a new payment for 10 kr reusing the customer token
-    Then the payment is unsuccessful and the exception message "Token not found." is returned
+    Then the payment is unsuccessful and the exception message "Token does not exist" is returned
 
 #  Scenario: Unsuccessful Payment due to low balance
 #    Given customer with name "Susan", last name "Baldwin", and CPR "129291-1429"
