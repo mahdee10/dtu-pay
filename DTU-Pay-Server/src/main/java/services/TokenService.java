@@ -49,7 +49,7 @@ public class TokenService {
         correlations.get(correlationId).complete(eventMessage);
     }
 
-    public TokenEventMessage getToken(UUID customerId) {
+    public TokenEventMessage getTokens(UUID customerId) {
         CorrelationId correlationId = CorrelationId.randomId();
         CompletableFuture<TokenEventMessage> futureGetTokenCompleted = new CompletableFuture<>();
         correlations.put(correlationId, futureGetTokenCompleted);

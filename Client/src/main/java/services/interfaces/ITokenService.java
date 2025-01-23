@@ -20,5 +20,5 @@ public interface ITokenService {
     @Path("/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getToken(@PathParam("customerId") UUID customerId);
+    public Response getTokens(@PathParam("customerId") UUID customerId);
 }

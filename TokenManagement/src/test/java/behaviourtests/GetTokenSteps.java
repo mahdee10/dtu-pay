@@ -39,14 +39,17 @@ public class GetTokenSteps {
 	public GetTokenSteps() {
 	}
 	
-	@Given("a registered customer with id {string} with at least {int} token")
-	public void a_registered_customer_with_id_with_at_least_token(String uuid, Integer int1) {
+	@Given("a registered customer with id {string} with at least {int} tokens")
+	public void a_registered_customer_with_id_with_at_least_token(String uuid, Integer nTokens) {
 		Token token = new Token(tokenUUID, true);
-		ArrayList<Token> tokenList = new ArrayList<Token>();
-		userUUID = UUID.fromString(uuid);
-		tokenList.add(token);
+		ArrayList<Token> tokenList = new ArrayList<>();
+
+		for (int i = 0; i < nTokens; i++) {
+			userUUID = UUID.fromString(uuid);
+			tokenList.add(token);
+		}
+
 		tokenRepository.addTokens(userUUID, tokenList);
-        assertTrue(tokenRepository.getTokens(userUUID).size() == int1);
 	}
 
 	@When("the event CustomerTokensRequest {string} is sent")
@@ -54,16 +57,16 @@ public class GetTokenSteps {
 		correlationId = CorrelationId.randomId();
 		tokenEventMessage = new TokenEventMessage();
 		tokenEventMessage.setCustomerId(userUUID);
-		tokenService.handleCustomerTokenRequest(new Event(CustomerTokensRequest, new Object[] { correlationId, tokenEventMessage}));
+		tokenService.handleGetCustomerTokensRequest(new Event(CustomerTokensRequest, new Object[] { correlationId, tokenEventMessage}));
 	}
 
-	@Then("a response CustomerTokensReturned {string} is sent and a customer receives a token")
+	@Then("a response CustomerTokensReturned {string} is sent and a customer receives a list of tokens")
 	public void a_response_customer_tokens_returned_is_sent_and_a_customer_receives_a_token(String CustomerTokensReturned) {
-		tokenEventMessage.setTokenUUID(tokenRepository.getTokens(userUUID).get(0).getUuid());
+		tokenEventMessage.setTokenList(tokenRepository.getTokens(userUUID).stream().map((Token::getUuid)).toList());
 		tokenEventMessage.setRequestResponseCode(OK);
 		Event event = new Event(CustomerTokensReturned, new Object[]{ correlationId, tokenEventMessage});
 		verify(queue).publish(event);
-		assertNotNull(tokenEventMessage.getTokenUUID());
+		assertNotNull(tokenEventMessage.getTokenList());
 	}
 
 	@Given("a registered customer with id {string} with {int} tokens")

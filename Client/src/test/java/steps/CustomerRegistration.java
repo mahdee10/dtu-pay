@@ -1,5 +1,6 @@
 package steps;
 
+import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -50,13 +51,18 @@ public class CustomerRegistration {
         userCustomer.setCprNumber(cpr);
     }
     @Then("the customer is registered with the bank with an initial balance of {double} kr")
-    public void the_customer_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) {
-        accountId = bankService.createAccount(
-                userCustomer.getFirstName(),
-                userCustomer.getLastName(),
-                userCustomer.getCprNumber(),
-                new BigDecimal(balance)
-        );
+    public void the_customer_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) throws BankServiceException_Exception {
+        try {
+            accountId = bankService.createAccount(
+                    userCustomer.getFirstName(),
+                    userCustomer.getLastName(),
+                    userCustomer.getCprNumber(),
+                    new BigDecimal(balance)
+            );
+        } catch (BankServiceException_Exception e) {
+            accountId = bankService.getAccountByCPR(userCustomer.getCprNumber()).getId();
+        }
+
         registerAccount(accountId);
     }
 

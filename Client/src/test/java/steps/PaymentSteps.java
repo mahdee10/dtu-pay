@@ -1,5 +1,6 @@
 package steps;
 
+import dtu.ws.fastmoney.BankServiceException;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
 import io.cucumber.java.en.Given;
@@ -18,8 +19,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentSteps {
     User userCustomer;
@@ -29,7 +29,8 @@ public class PaymentSteps {
     private UUID customerId;
     private UUID customerToken;
     private UUID merchantId;
-    private boolean paymentIsSuccessfull;
+    private boolean paymentIsSuccessful;
+    private String exceptionMessage;
     BankServiceImplementation bankService = new BankServiceImplementation();
 
     private static List<String> createdAccountIds = new ArrayList<>();
@@ -56,13 +57,17 @@ public class PaymentSteps {
     }
 
     @Given("customer is registered with the bank with an initial balance of {double} kr")
-    public void customer_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) {
-        customerBankAccountId = bankService.createAccount(
-                userCustomer.getFirstName(),
-                userCustomer.getLastName(),
-                userCustomer.getCprNumber(),
-                new BigDecimal(balance)
-        );
+    public void customer_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) throws BankServiceException_Exception {
+        try {
+            customerBankAccountId = bankService.createAccount(
+                    userCustomer.getFirstName(),
+                    userCustomer.getLastName(),
+                    userCustomer.getCprNumber(),
+                    new BigDecimal(balance)
+            );
+        } catch (BankServiceException_Exception e) {
+            customerBankAccountId = bankService.getAccountByCPR(userCustomer.getCprNumber()).getId();
+        }
 
         createdAccountIds.add(customerBankAccountId);
     }
@@ -88,13 +93,17 @@ public class PaymentSteps {
     }
 
     @Given("merchant is registered with the bank with an initial balance of {double} kr")
-    public void merchant_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) {
-        merchantBankAccountId = bankService.createAccount(
-                userMerchant.getFirstName(),
-                userMerchant.getLastName(),
-                userMerchant.getCprNumber(),
-                new BigDecimal(balance)
-        );
+    public void merchant_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) throws BankServiceException_Exception {
+        try {
+            merchantBankAccountId = bankService.createAccount(
+                    userMerchant.getFirstName(),
+                    userMerchant.getLastName(),
+                    userMerchant.getCprNumber(),
+                    new BigDecimal(balance)
+            );
+        } catch (BankServiceException_Exception e) {
+            merchantBankAccountId = bankService.getAccountByCPR(userMerchant.getCprNumber()).getId();
+        }
 
         createdAccountIds.add(merchantBankAccountId);
     }
@@ -117,17 +126,17 @@ public class PaymentSteps {
         assertEquals(nTokensCreated, int1.intValue());
     }
 
-    @When("the merchant initiates a payment for {int} kr by the customer token")
+    @When("the merchant initiates a payment for {int} kr by using the customer token")
     public void theMerchantInitiatesAPaymentForKrByTheCustomerToken(Integer amount) throws Exception {
-        customerToken = tokenService.getToken(customerId);
-        paymentIsSuccessfull = paymentService.pay(
+        customerToken = tokenService.getTokens(customerId).getFirst();
+        paymentIsSuccessful = paymentService.pay(
                 new PaymentRequestDto(customerToken, merchantId, amount)
         );
     }
 
     @Then("the payment is successful")
     public void the_payment_is_successful() {
-        assertTrue(paymentIsSuccessfull);
+        assertTrue(paymentIsSuccessful);
     }
 
     @Then("the balance of the customer at the bank is {int} kr")
@@ -148,8 +157,25 @@ public class PaymentSteps {
 
     @Then("the customer has {int} tokens")
     public void theCustomerHasTokens(Integer int1) throws Exception {
-        int nAvailableTokens = tokenService.createTokens(new TokenRequestDto(customerId, 0));
-        assertEquals(nAvailableTokens, int1.intValue());
+        List<UUID> availableTokens = tokenService.getTokens(customerId);
+        assertEquals(availableTokens.size(), int1.intValue());
+    }
+
+    @When("the merchant initiates a new payment for {int} kr reusing the customer token")
+    public void the_merchant_initiates_a_new_payment_for_kr_reusing_the_customer_token(Integer amount) {
+        try {
+            paymentIsSuccessful = paymentService.pay(
+                    new PaymentRequestDto(customerToken, merchantId, amount)
+            );
+        } catch (Exception e) {
+            exceptionMessage = e.getMessage();
+        }
+
+    }
+
+    @Then("the payment is unsuccessful and the exception message {string} is returned")
+    public void thePaymentIsUnsuccessfulAndTheExceptionMessageIsReturned(String mesasage) {
+        assertEquals(mesasage, exceptionMessage);
     }
 
 }

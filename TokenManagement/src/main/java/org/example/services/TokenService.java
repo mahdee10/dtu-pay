@@ -31,7 +31,7 @@ public class TokenService {
     public TokenService(MessageQueue queue) {
         this.queue = queue;
         this.queue.addHandler(TOKEN_VALIDATION_REQUESTED, this::handleTokenValidationRequest);
-        this.queue.addHandler(CUSTOMER_TOKENS_REQUESTED, this::handleCustomerTokenRequest);
+        this.queue.addHandler(CUSTOMER_TOKENS_REQUESTED, this::handleGetCustomerTokensRequest);
         this.queue.addHandler(REQUEST_TOKENS_EVENT, this::handleRequestTokensEvent);
         this.queue.addHandler(USE_TOKEN_REQUEST, this::handleUseTokenRequest);
     }
@@ -64,12 +64,12 @@ public class TokenService {
         queue.publish(event);
     }
 
-    public void handleCustomerTokenRequest(Event e) {
+    public void handleGetCustomerTokensRequest(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);
     	UUID uuid = eventMessage.getCustomerId();
-    	Token token = tokenRepository.getTokens(uuid).stream().findAny().orElse(null);
-    	if(token == null) {
+    	List<Token> tokens = tokenRepository.getTokens(uuid);
+    	if(tokens.isEmpty()) {
             eventMessage.setRequestResponseCode(BAD_REQUEST);
             eventMessage.setExceptionMessage("You have no more tokens. Request more tokens.");
             Event event = new Event(CUSTOMER_TOKENS_RETURNED, new Object[] {
@@ -79,7 +79,7 @@ public class TokenService {
             return;
         }
 
-        eventMessage.setTokenUUID(token.getUuid());
+        eventMessage.setTokenList(tokens.stream().map((Token::getUuid)).toList());
         eventMessage.setRequestResponseCode(OK);
         Event event = new Event(CUSTOMER_TOKENS_RETURNED, new Object[] { correlationId, eventMessage });
         queue.publish(event);

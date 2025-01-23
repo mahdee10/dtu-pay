@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Setter
@@ -12,6 +13,7 @@ import java.util.UUID;
 public class TokenEventMessage {
     private UUID customerId;
     private UUID tokenUUID;
+    private List<UUID> tokenList;
     private Integer requestedTokens;
     private Integer createdTokens;
     private Boolean isValid;

@@ -102,7 +102,7 @@ public class CustomerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTokens(@PathParam("customerId") UUID customerId) {
-        TokenEventMessage eventMessage = tokenService.getToken(customerId);
+        TokenEventMessage eventMessage = tokenService.getTokens(customerId);
 
         if (eventMessage.getRequestResponseCode() != Response.Status.OK.getStatusCode()) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -111,7 +111,7 @@ public class CustomerResource {
         }
 
         return Response.status(Response.Status.OK)
-                .entity(eventMessage.getTokenUUID())
+                .entity(eventMessage.getTokenList())
                 .build();
     }
 
