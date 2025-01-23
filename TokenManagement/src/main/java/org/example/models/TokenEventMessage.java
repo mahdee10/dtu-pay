@@ -17,7 +17,6 @@ public class TokenEventMessage {
     private Integer requestedTokens;
     private Integer createdTokens;
     private Boolean isValid;
-    private Boolean isTokenUsed;
     private int requestResponseCode;
     private String exceptionMessage;
 

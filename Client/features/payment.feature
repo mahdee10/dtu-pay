@@ -14,7 +14,6 @@ Feature: Generate payment
     And the balance of the merchant at the bank is 1010 kr
     And the customer has 2 tokens
 
-
   Scenario: Unsuccessful Payment reusing a customer token
     Given customer with name "Susan", last name "Baldwin", and CPR "129291-1429"
     And customer is registered with the bank with an initial balance of 1000.0 kr

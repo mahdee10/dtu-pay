@@ -13,8 +13,6 @@ import java.util.UUID;
 
 public class TokenService {
 
-    private static final String TOKEN_VALIDATION_REQUESTED = "TokenValidationRequest";
-    private static final String TOKEN_VALIDATION_RETURNED = "TokenValidationReturned";
     private static final String CUSTOMER_TOKENS_REQUESTED = "CustomerTokensRequest";
     private static final String CUSTOMER_TOKENS_RETURNED = "CustomerTokensReturned";
     private static final String REQUEST_TOKENS_EVENT = "RequestTokensEvent";
@@ -30,38 +28,9 @@ public class TokenService {
 
     public TokenService(MessageQueue queue) {
         this.queue = queue;
-        this.queue.addHandler(TOKEN_VALIDATION_REQUESTED, this::handleTokenValidationRequest);
         this.queue.addHandler(CUSTOMER_TOKENS_REQUESTED, this::handleGetCustomerTokensRequest);
         this.queue.addHandler(REQUEST_TOKENS_EVENT, this::handleRequestTokensEvent);
         this.queue.addHandler(USE_TOKEN_REQUEST, this::handleUseTokenRequest);
-    }
-
-    public void handleTokenValidationRequest(Event e) {
-        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
-        TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);
-        UUID tokenUUID = eventMessage.getTokenUUID();
-        boolean isValid = tokenRepository.getAllTokens()
-                .stream()
-                .anyMatch(token -> token.getUuid().equals(tokenUUID) && token.isValid());
-
-        if (!isValid) {
-            boolean exists = tokenRepository.getAllTokens().stream().anyMatch(token -> token.getUuid().equals(tokenUUID));
-            if (!exists) {
-                eventMessage.setRequestResponseCode(BAD_REQUEST);
-                eventMessage.setExceptionMessage("Token not found.");
-                Event event = new Event(TOKEN_VALIDATION_RETURNED,
-                        new Object[]{ correlationId, eventMessage });
-                queue.publish(event);
-                return;
-            }
-        }
-
-        UUID customerId = tokenRepository.getCustomerId(tokenUUID);
-        eventMessage.setRequestResponseCode(OK);
-        eventMessage.setCustomerId(customerId);
-        eventMessage.setIsValid(isValid);
-        Event event = new Event(TOKEN_VALIDATION_RETURNED, new Object[] { correlationId, eventMessage });
-        queue.publish(event);
     }
 
     public void handleGetCustomerTokensRequest(Event e) {
@@ -126,17 +95,34 @@ public class TokenService {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);
 
-        eventMessage.setIsTokenUsed(true);
-        eventMessage.setRequestResponseCode(OK);
-        Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
-        try {
-            tokenRepository.useToken(eventMessage.getTokenUUID());
-        } catch (Exception exception) {
-            eventMessage.setRequestResponseCode(BAD_REQUEST);
-            eventMessage.setExceptionMessage(exception.getMessage());
-            eventMessage.setIsTokenUsed(false);
-            event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
+        UUID tokenUUID = eventMessage.getTokenUUID();
+        UUID customerId = tokenRepository.getCustomerId(tokenUUID);
+        if( customerId != null){
+
+            boolean isValid = tokenRepository.getAllTokens()
+                    .stream()
+                    .anyMatch(token -> token.getUuid().equals(tokenUUID) && token.isValid());
+
+            if (!isValid) {
+                eventMessage.setRequestResponseCode(BAD_REQUEST);
+                eventMessage.setExceptionMessage("Token does not exist");
+                eventMessage.setIsValid(false);
+                Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
+                queue.publish(event);
+                return;
+
+            }
+            eventMessage.setRequestResponseCode(OK);
+            eventMessage.setCustomerId(customerId);
+            eventMessage.setIsValid(isValid);
+            Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
+            queue.publish(event);
+            return;
         }
+        eventMessage.setRequestResponseCode(BAD_REQUEST);
+        eventMessage.setExceptionMessage("Token does not exist");
+        eventMessage.setIsValid(false);
+        Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 
