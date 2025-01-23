@@ -12,6 +12,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MerchantService {
+    private static final String MERCHANT_REGISTRATION_REQUESTED = "MerchantRegistrationRequested";
+    private static final String MERCHANT_CREATED = "MerchantCreated";
+    private static final String MERCHANT_DEREGISTRATION_REQUESTED = "MerchantDeregistrationRequested";
+    private static final String MERCHANT_DEREGISTERED = "MerchantDeregistered";
+    private static final String VALIDATE_MERCHANT_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
+    private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
+
     private MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CompletableFuture<AccountEventMessage>> correlations = new ConcurrentHashMap<>();
 
@@ -32,8 +39,9 @@ public class MerchantService {
 
     public MerchantService(MessageQueue q) {
         queue = q;
-        queue.addHandler("MerchantCreated", this::handleMerchantCreated);
-        queue.addHandler("MerchantDeregistered", this::handleDeregisteredMerchant);
+        queue.addHandler(MERCHANT_CREATED, this::handleMerchantCreated);
+        queue.addHandler(MERCHANT_DEREGISTERED, this::handleDeregisteredMerchant);
+        queue.addHandler(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, this::handleMerchantAccountValidationResponse);
     }
 
     public AccountEventMessage createMerchant(CreateMerchantDto merchant) {
@@ -77,5 +85,27 @@ public class MerchantService {
         AccountEventMessage eventMessage = e.getArgument(1, AccountEventMessage.class);
 
         correlations.get(correlationId).complete(eventMessage);
+    }
+
+    private void handleMerchantAccountValidationResponse(Event ev) {
+        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
+        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
+
+        correlations.get(correlationId).complete(eventMessage);
+    }
+
+    public AccountEventMessage validateMerchantAccount(UUID merchantId) {
+        CorrelationId merchantValidationCorrelationId = CorrelationId.randomId();
+        CompletableFuture<AccountEventMessage> futureMerchantValidation = new CompletableFuture<>();
+        correlations.put(merchantValidationCorrelationId, futureMerchantValidation);
+
+        AccountEventMessage accountEventMessage = new AccountEventMessage();
+        accountEventMessage.setMerchantId(merchantId);
+
+        Event merchantAccountValidationEvent = new Event(VALIDATE_MERCHANT_ACCOUNT_REQUESTED,
+                new Object[] { merchantValidationCorrelationId, accountEventMessage });
+        queue.publish(merchantAccountValidationEvent);
+
+        return futureMerchantValidation.join();
     }
 }

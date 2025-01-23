@@ -14,8 +14,6 @@ public class CustomerService {
     private static final String CUSTOMER_CREATED = "CustomerCreated";
     private static final String CUSTOMER_DEREGISTRATION_REQUESTED = "CustomerDeregistrationRequested";
     private static final String CUSTOMER_DEREGISTERED = "CustomerDeregistered";
-    private static final String GET_CUSTOMER_BANK_ACCOUNT_REQUESTED = "GetCustomerBankAccountRequested";
-    private static final String CUSTOMER_BANK_ACCOUNT_RESPONSE = "CustomerBankAccountResponse";
     private static final String VALIDATE_CUSTOMER_ACCOUNT_REQUESTED = "ValidateCustomerAccountRequested";
     private static final String CUSTOMER_ACCOUNT_VALIDATION_RESPONSE = "CustomerAccountValidationResponse";
 
@@ -30,7 +28,6 @@ public class CustomerService {
         this.queue = q;
         this.queue.addHandler(CUSTOMER_REGISTRATION_REQUESTED, this::handleCustomerRegistrationRequested);
         this.queue.addHandler(CUSTOMER_DEREGISTRATION_REQUESTED, this::handleCustomerDeregistrationRequested);
-        this.queue.addHandler(GET_CUSTOMER_BANK_ACCOUNT_REQUESTED, this::handleGetCustomerBankAccountRequested);
         this.queue.addHandler(VALIDATE_CUSTOMER_ACCOUNT_REQUESTED, this::handleValidateCustomerAccountRequested);
     }
 
@@ -67,21 +64,6 @@ public class CustomerService {
         eventMessage.setRequestResponseCode(OK);
 
         Event event = new Event(CUSTOMER_DEREGISTERED, new Object[]{ correlationId, eventMessage });
-        queue.publish(event);
-    }
-
-    public void handleGetCustomerBankAccountRequested(Event ev) {
-        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
-        AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);
-        UUID customerId = eventMessage.getCustomerId();
-
-        Customer customer = customerRepository.getCustomer(customerId);
-        String bankAccountId = customer != null ? customer.getBankAccountId() : null;
-
-        eventMessage.setBankAccount(bankAccountId);
-        eventMessage.setRequestResponseCode(OK);
-
-        Event event = new Event(CUSTOMER_BANK_ACCOUNT_RESPONSE, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
     }
 

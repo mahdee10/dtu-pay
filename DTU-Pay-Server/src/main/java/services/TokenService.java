@@ -3,10 +3,10 @@ package services;
 import messaging.Event;
 import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
+import models.AccountEventMessage;
 import models.CorrelationId;
 import models.TokenEventMessage;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -17,8 +17,15 @@ public class TokenService {
     private static final String REQUEST_TOKENS_RESPONSE = "RequestTokensResponse";
     private static final String CUSTOMER_TOKENS_REQUESTED = "CustomerTokensRequest";
     private static final String CUSTOMER_TOKENS_RETURNED = "CustomerTokensReturned";
+    private static final String USE_TOKEN_REQUEST = "UseTokenRequest";
+    private static final String USE_TOKEN_RESPONSE = "UseTokenResponse";
+
+    public static final int BAD_REQUEST = 400;
+    public static final int OK = 200;
+
 
     static TokenService service = null;
+    static CustomerService customerService = CustomerService.getService();
 
     private MessageQueue queue;
     private Map<CorrelationId, CompletableFuture<TokenEventMessage>> correlations = new ConcurrentHashMap<>();
@@ -40,6 +47,7 @@ public class TokenService {
         queue = q;
         queue.addHandler(REQUEST_TOKENS_RESPONSE, this::handleRequestTokensResponse);
         queue.addHandler(CUSTOMER_TOKENS_RETURNED, this::handleCustomerTokensReturned);
+        queue.addHandler(USE_TOKEN_RESPONSE, this::handleUseTokenResponse);
     }
 
     private void handleCustomerTokensReturned(Event e) {
@@ -84,4 +92,40 @@ public class TokenService {
 
         return futureCreateTokensCompleted.join();
     }
+
+    private void handleUseTokenResponse(Event ev) {
+        CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
+        TokenEventMessage eventMessage = ev.getArgument(1, TokenEventMessage.class);
+
+        correlations.get(correlationId).complete(eventMessage);
+    }
+
+    public TokenEventMessage useToken(UUID customerToken) {
+        CorrelationId useTokenCorrelationId = CorrelationId.randomId();
+        CompletableFuture<TokenEventMessage> futureUseToken = new CompletableFuture<>();
+        correlations.put(useTokenCorrelationId, futureUseToken);
+
+        TokenEventMessage tokenEventMessage = new TokenEventMessage();
+        tokenEventMessage.setTokenUUID(customerToken);
+
+        Event useTokenEvent = new Event(USE_TOKEN_REQUEST, new Object[] { useTokenCorrelationId, tokenEventMessage });
+        queue.publish(useTokenEvent);
+
+        TokenEventMessage responseEventMessage =  futureUseToken.join();
+
+        AccountEventMessage accountMessageEvent = customerService.validateCustomerAccount(responseEventMessage.getCustomerId());
+        if (!accountMessageEvent.getIsValidAccount() || accountMessageEvent.getRequestResponseCode() != 200) {
+            responseEventMessage.setExceptionMessage(accountMessageEvent.getExceptionMessage());
+            responseEventMessage.setRequestResponseCode(BAD_REQUEST);
+
+            return responseEventMessage;
+        }
+
+        responseEventMessage.setBankAccount(accountMessageEvent.getBankAccount());
+        responseEventMessage.setRequestResponseCode(OK);
+        return responseEventMessage;
+
+    }
+
+
 }

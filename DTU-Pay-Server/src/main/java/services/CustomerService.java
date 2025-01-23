@@ -12,6 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import models.CorrelationId;
 
 public class CustomerService {
+    private static final String CUSTOMER_REGISTRATION_REQUESTED = "CustomerRegistrationRequested";
+    private static final String CUSTOMER_CREATED = "CustomerCreated";
+    private static final String CUSTOMER_DEREGISTRATION_REQUESTED = "CustomerDeregistrationRequested";
+    private static final String CUSTOMER_DEREGISTERED = "CustomerDeregistered";
+    private static final String VALIDATE_CUSTOMER_ACCOUNT_REQUESTED = "ValidateCustomerAccountRequested";
+    private static final String CUSTOMER_ACCOUNT_VALIDATED_RESPONSE = "CustomerAccountValidationResponse";
+
     private MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CompletableFuture<AccountEventMessage>> correlations = new ConcurrentHashMap<>();
 
@@ -32,8 +39,9 @@ public class CustomerService {
 
     public CustomerService(MessageQueue q) {
         queue = q;
-        queue.addHandler("CustomerCreated", this::handleCustomerCreated);
-        queue.addHandler("CustomerDeregistered", this::handleDeregisteredCustomer);
+        queue.addHandler(CUSTOMER_CREATED, this::handleCustomerCreated);
+        queue.addHandler(CUSTOMER_DEREGISTERED, this::handleDeregisteredCustomer);
+        queue.addHandler(CUSTOMER_ACCOUNT_VALIDATED_RESPONSE, this::handleValidateCustomerAccountResponse);
     }
 
     public AccountEventMessage createCustomer(CreateCustomerDto customer) {
@@ -46,7 +54,7 @@ public class CustomerService {
         eventMessage.setCpr(customer.getCpr());
         eventMessage.setBankAccount(customer.getBankAccountId());
 
-        Event event = new Event("CustomerRegistrationRequested", new Object[] { correlationId, eventMessage });
+        Event event = new Event(CUSTOMER_REGISTRATION_REQUESTED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
 
         return correlations.get(correlationId).join();
@@ -66,7 +74,7 @@ public class CustomerService {
         AccountEventMessage eventMessage = new AccountEventMessage();
         eventMessage.setCustomerId(customerId);
 
-        Event event = new Event("CustomerDeregistrationRequested", new Object[] { correlationId, eventMessage });
+        Event event = new Event(CUSTOMER_DEREGISTRATION_REQUESTED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
 
         return correlations.get(correlationId).join();
@@ -77,5 +85,27 @@ public class CustomerService {
         AccountEventMessage eventMessage = e.getArgument(1, AccountEventMessage.class);
 
         correlations.get(correlationId).complete(eventMessage);
+    }
+
+    private void handleValidateCustomerAccountResponse(Event e) {
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        AccountEventMessage eventMessage = e.getArgument(1, AccountEventMessage.class);
+
+        correlations.get(correlationId).complete(eventMessage);
+    }
+
+    public AccountEventMessage validateCustomerAccount(UUID customerId) {
+        CorrelationId customerGetBankAccountCorrelationId = CorrelationId.randomId();
+        CompletableFuture<AccountEventMessage> futureGetCustomerBankAccount = new CompletableFuture<>();
+        correlations.put(customerGetBankAccountCorrelationId, futureGetCustomerBankAccount);
+
+        AccountEventMessage accountEventMessage = new AccountEventMessage();
+        accountEventMessage.setCustomerId(customerId);
+
+        Event customerTokenValidationEvent = new Event(VALIDATE_CUSTOMER_ACCOUNT_REQUESTED,
+                new Object[] { customerGetBankAccountCorrelationId, accountEventMessage });
+        queue.publish(customerTokenValidationEvent);
+
+        return futureGetCustomerBankAccount.join();
     }
 }

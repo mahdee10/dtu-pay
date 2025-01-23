@@ -18,6 +18,7 @@ public class TokenEventMessage {
     private Integer createdTokens;
     private Boolean isValid;
     private Boolean isTokenUsed;
+    private String BankAccount;
     private int requestResponseCode;
     private String exceptionMessage;
 

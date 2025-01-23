@@ -8,11 +8,11 @@ import models.Merchant;
 import repositories.MerchantRepository;
 
 public class MerchantService {
-    private static final String Merchant_REGISTRATION_REQUESTED = "MerchantRegistrationRequested";
-    private static final String Merchant_CREATED = "MerchantCreated";
-    private static final String Merchant_DEREGISTRATION_REQUESTED = "MerchantDeregistrationRequested";
-    private static final String Merchant_DEREGISTERED = "MerchantDeregistered";
-    private static final String VALIDATE_Merchant_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
+    private static final String MERCHANT_REGISTRATION_REQUESTED = "MerchantRegistrationRequested";
+    private static final String MERCHANT_CREATED = "MerchantCreated";
+    private static final String MERCHANT_DEREGISTRATION_REQUESTED = "MerchantDeregistrationRequested";
+    private static final String MERCHANT_DEREGISTERED = "MerchantDeregistered";
+    private static final String VALIDATE_MERCHANT_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
     private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
 
     public static final int BAD_REQUEST = 400;
@@ -24,9 +24,9 @@ public class MerchantService {
 
     public MerchantService(MessageQueue q) {
         this.queue = q;
-        this.queue.addHandler(Merchant_REGISTRATION_REQUESTED, this::handleMerchantRegistrationRequested);
-        this.queue.addHandler(Merchant_DEREGISTRATION_REQUESTED, this::handleMerchantDeregistrationRequested);
-        this.queue.addHandler(VALIDATE_Merchant_ACCOUNT_REQUESTED, this::handleValidateMerchantAccountRequested);
+        this.queue.addHandler(MERCHANT_REGISTRATION_REQUESTED, this::handleMerchantRegistrationRequested);
+        this.queue.addHandler(MERCHANT_DEREGISTRATION_REQUESTED, this::handleMerchantDeregistrationRequested);
+        this.queue.addHandler(VALIDATE_MERCHANT_ACCOUNT_REQUESTED, this::handleValidateMerchantAccountRequested);
     }
 
     public void handleMerchantRegistrationRequested(Event ev) {
@@ -46,7 +46,7 @@ public class MerchantService {
         eventMessage.setRequestResponseCode(OK);
         eventMessage.setMerchantId(merchant.getId());
 
-        Event event = new Event(Merchant_CREATED, new Object[] { correlationId, eventMessage });
+        Event event = new Event(MERCHANT_CREATED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 
@@ -60,7 +60,7 @@ public class MerchantService {
         eventMessage.setIsAccountDeleted(isDeleted);
         eventMessage.setRequestResponseCode(OK);
 
-        Event event = new Event(Merchant_DEREGISTERED, new Object[] { correlationId, eventMessage });
+        Event event = new Event(MERCHANT_DEREGISTERED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 
