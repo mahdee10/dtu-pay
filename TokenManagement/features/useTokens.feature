@@ -18,6 +18,6 @@ Feature: Using a token
     Then a response event "UseTokenResponse" is sent and contains an exception "Token does not exist"
 
   Scenario: A non-existing token is used to pay
-    Given a payment service supplies an token with UUID "36974c1f-c4db-4418-8a3f-e62e78a5x1305" to pay
+    Given a payment service supplies an token with UUID "bf369932-446d-4dc2-a397-1489c6acbbed" to pay
     When the event "UseTokenRequest" is received
     Then a response event "UseTokenResponse" is sent and contains an exception "Token does not exist"

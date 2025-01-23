@@ -12,7 +12,7 @@ public class Merchant {
     public Merchant() {}
 
     public Merchant(String firstName, String lastName, String cpr, String bankAccountId) {
-        this.id =UUID.randomUUID();
+        this.id = UUID.randomUUID();
         this.firstName = firstName;
         this.lastName = lastName;
         this.cpr = cpr;

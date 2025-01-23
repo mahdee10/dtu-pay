@@ -13,7 +13,7 @@ public class MerchantService {
     private static final String MERCHANT_DEREGISTRATION_REQUESTED = "MerchantDeregistrationRequested";
     private static final String MERCHANT_DEREGISTERED = "MerchantDeregistered";
     private static final String VALIDATE_MERCHANT_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
-    private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
+    private static final String MERCHANT_ACCOUNT_VALIDATED = "MerchantAccountValidated";
 
     public static final int BAD_REQUEST = 400;
     public static final int OK = 200;
@@ -76,7 +76,7 @@ public class MerchantService {
         eventMessage.setRequestResponseCode(isValid ? OK : BAD_REQUEST);
         eventMessage.setExceptionMessage(isValid ? null : "Merchant account does not exist.");
 
-        Event event = new Event(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, new Object[] { correlationId, eventMessage });
+        Event event = new Event(MERCHANT_ACCOUNT_VALIDATED, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
 }

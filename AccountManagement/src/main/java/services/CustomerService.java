@@ -15,7 +15,7 @@ public class CustomerService {
     private static final String CUSTOMER_DEREGISTRATION_REQUESTED = "CustomerDeregistrationRequested";
     private static final String CUSTOMER_DEREGISTERED = "CustomerDeregistered";
     private static final String VALIDATE_CUSTOMER_ACCOUNT_REQUESTED = "ValidateCustomerAccountRequested";
-    private static final String CUSTOMER_ACCOUNT_VALIDATION_RESPONSE = "CustomerAccountValidationResponse";
+    private static final String CUSTOMER_ACCOUNT_VALIDATED = "CustomerAccountValidated";
 
     public static final int BAD_REQUEST = 400;
     public static final int OK = 200;
@@ -79,7 +79,7 @@ public class CustomerService {
         eventMessage.setRequestResponseCode(isValid ? OK : BAD_REQUEST);
         eventMessage.setExceptionMessage(isValid ? null : "Customer account does not exist.");
 
-        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATION_RESPONSE, new Object[]{ correlationId, eventMessage });
+        Event event = new Event(CUSTOMER_ACCOUNT_VALIDATED, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
     }
 }

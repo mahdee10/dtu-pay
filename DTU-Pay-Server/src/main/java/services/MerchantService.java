@@ -17,7 +17,7 @@ public class MerchantService {
     private static final String MERCHANT_DEREGISTRATION_REQUESTED = "MerchantDeregistrationRequested";
     private static final String MERCHANT_DEREGISTERED = "MerchantDeregistered";
     private static final String VALIDATE_MERCHANT_ACCOUNT_REQUESTED = "ValidateMerchantAccountRequested";
-    private static final String MERCHANT_ACCOUNT_VALIDATION_RESPONSE = "MerchantAccountValidationResponse";
+    private static final String MERCHANT_ACCOUNT_VALIDATED = "MerchantAccountValidated";
 
     private MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CompletableFuture<AccountEventMessage>> correlations = new ConcurrentHashMap<>();
@@ -41,7 +41,7 @@ public class MerchantService {
         queue = q;
         queue.addHandler(MERCHANT_CREATED, this::handleMerchantCreated);
         queue.addHandler(MERCHANT_DEREGISTERED, this::handleDeregisteredMerchant);
-        queue.addHandler(MERCHANT_ACCOUNT_VALIDATION_RESPONSE, this::handleMerchantAccountValidationResponse);
+        queue.addHandler(MERCHANT_ACCOUNT_VALIDATED, this::handleMerchantAccountValidationResponse);
     }
 
     public AccountEventMessage createMerchant(CreateMerchantDto merchant) {
@@ -54,7 +54,7 @@ public class MerchantService {
         eventMessage.setCpr(merchant.getCpr());
         eventMessage.setBankAccount(merchant.getBankAccountId());
 
-        Event event = new Event("MerchantRegistrationRequested", new Object[]{ correlationId, eventMessage });
+        Event event = new Event(MERCHANT_REGISTRATION_REQUESTED, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
 
         return correlations.get(correlationId).join();
@@ -74,7 +74,7 @@ public class MerchantService {
         AccountEventMessage eventMessage = new AccountEventMessage();
         eventMessage.setMerchantId(merchantId);
 
-        Event event = new Event("MerchantDeregistrationRequested", new Object[]{ correlationId, eventMessage });
+        Event event = new Event(MERCHANT_DEREGISTRATION_REQUESTED, new Object[]{ correlationId, eventMessage });
         queue.publish(event);
 
         return correlations.get(correlationId).join();

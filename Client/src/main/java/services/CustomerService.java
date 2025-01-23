@@ -24,4 +24,14 @@ public class CustomerService {
         return response.readEntity(UUID.class);
     }
 
+    public boolean unregisterCustomer(UUID customerId) throws Exception {
+        Response response = service.unregisterCustomer(customerId);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
+
+        return response.readEntity(Boolean.class);
+    }
+
 }

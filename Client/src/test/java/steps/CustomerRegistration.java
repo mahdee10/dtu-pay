@@ -14,11 +14,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CustomerRegistration {
     User userCustomer;
     private String accountId;
     private UUID customerId;
+    private boolean isCustomerUnregistered;
     BankServiceImplementation bankService = new BankServiceImplementation();
 
     private static List<String> createdAccountIds = new ArrayList<>();
@@ -77,4 +79,15 @@ public class CustomerRegistration {
         customerId = customerService.createCustomer(payloadUser);
         assertNotNull(customerId, "Customer ID should not be null");
     }
+
+    @When("the customer unregisters")
+    public void theCustomerUnregisters() throws Exception {
+        isCustomerUnregistered = customerService.unregisterCustomer(customerId);
+    }
+
+    @Then("the customer is not registered anymore")
+    public void theCustomerIsNotRegisteredAnymore() {
+        assertTrue(isCustomerUnregistered);
+    }
+
 }

@@ -24,4 +24,14 @@ public class MerchantService {
         return response.readEntity(UUID.class);
     }
 
+    public boolean unregisterCustomer(UUID merchantId) throws Exception {
+        Response response = service.unregisterMerchant(merchantId);
+
+        if (response.getStatus() != 200) {
+            throw new Exception(response.readEntity(String.class));
+        }
+
+        return response.readEntity(Boolean.class);
+    }
+
 }

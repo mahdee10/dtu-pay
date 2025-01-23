@@ -9,7 +9,10 @@ public class StartUp {
     }
 
     private void startUp() throws Exception {
-        var mq = new RabbitMqQueue("rabbitMq_container");
+        String environment = System.getenv("Environment");
+        String hostname = environment != null && environment.equalsIgnoreCase("development")
+                ? "localhost" : "rabbitMq_container";
+        var mq = new RabbitMqQueue(hostname);
         new TokenService(mq);
     }
 }

@@ -33,7 +33,7 @@ public class TokenRepository {
 
     public void useToken(UUID tokenUUID) throws Exception {
         boolean isValid = getAllTokens().stream().anyMatch(t -> t.getUuid().equals(tokenUUID));
-        if(!isValid) throw new Exception("Invalid token");
+        if(!isValid) throw new Exception("Token does not exist");
 
         AtomicReference<UUID> userUUID = new AtomicReference<>();
         AtomicReference<Token> tokenToUse = new AtomicReference<>();

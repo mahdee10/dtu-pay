@@ -17,7 +17,7 @@ public class CustomerService {
     private static final String CUSTOMER_DEREGISTRATION_REQUESTED = "CustomerDeregistrationRequested";
     private static final String CUSTOMER_DEREGISTERED = "CustomerDeregistered";
     private static final String VALIDATE_CUSTOMER_ACCOUNT_REQUESTED = "ValidateCustomerAccountRequested";
-    private static final String CUSTOMER_ACCOUNT_VALIDATED_RESPONSE = "CustomerAccountValidationResponse";
+    private static final String CUSTOMER_ACCOUNT_VALIDATED = "CustomerAccountValidated";
 
     private MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CompletableFuture<AccountEventMessage>> correlations = new ConcurrentHashMap<>();
@@ -41,7 +41,7 @@ public class CustomerService {
         queue = q;
         queue.addHandler(CUSTOMER_CREATED, this::handleCustomerCreated);
         queue.addHandler(CUSTOMER_DEREGISTERED, this::handleDeregisteredCustomer);
-        queue.addHandler(CUSTOMER_ACCOUNT_VALIDATED_RESPONSE, this::handleValidateCustomerAccountResponse);
+        queue.addHandler(CUSTOMER_ACCOUNT_VALIDATED, this::handleValidateCustomerAccountResponse);
     }
 
     public AccountEventMessage createCustomer(CreateCustomerDto customer) {

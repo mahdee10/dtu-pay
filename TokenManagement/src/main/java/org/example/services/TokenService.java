@@ -95,33 +95,22 @@ public class TokenService {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);
 
-        UUID tokenUUID = eventMessage.getTokenUUID();
-        UUID customerId = tokenRepository.getCustomerId(tokenUUID);
-        if( customerId != null){
-
-            boolean isValid = tokenRepository.getAllTokens()
-                    .stream()
-                    .anyMatch(token -> token.getUuid().equals(tokenUUID) && token.isValid());
-
-            if (!isValid) {
-                eventMessage.setRequestResponseCode(BAD_REQUEST);
-                eventMessage.setExceptionMessage("Token does not exist");
-                eventMessage.setIsValid(false);
-                Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
-                queue.publish(event);
-                return;
-
-            }
-            eventMessage.setRequestResponseCode(OK);
+        try {
+            UUID customerId = tokenRepository.getCustomerId(eventMessage.getTokenUUID());
             eventMessage.setCustomerId(customerId);
-            eventMessage.setIsValid(isValid);
+            tokenRepository.useToken(eventMessage.getTokenUUID());
+        } catch (Exception ex) {
+            eventMessage.setRequestResponseCode(BAD_REQUEST);
+            eventMessage.setExceptionMessage(ex.getMessage());
+            eventMessage.setIsValid(false);
             Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
             queue.publish(event);
             return;
         }
-        eventMessage.setRequestResponseCode(BAD_REQUEST);
-        eventMessage.setExceptionMessage("Token does not exist");
-        eventMessage.setIsValid(false);
+
+        eventMessage.setRequestResponseCode(OK);
+        eventMessage.setCustomerId(eventMessage.getCustomerId());
+        eventMessage.setIsValid(true);
         Event event = new Event(USE_TOKEN_RESPONSE, new Object[] { correlationId, eventMessage });
         queue.publish(event);
     }
