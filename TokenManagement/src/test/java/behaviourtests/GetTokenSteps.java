@@ -45,12 +45,10 @@ public class GetTokenSteps {
 	public void a_registered_customer_with_id_with_at_least_token(String uuid, Integer nToken) {
 		Token token = new Token(tokenUUID, true);
 		ArrayList<Token> tokenList = new ArrayList<>();
-
 		for (int i = 0; i <= nToken; i++) {
 			userUUID = UUID.fromString(uuid);
 			tokenList.add(token);
 		}
-
 		tokenRepository.addTokens(userUUID, tokenList);
 	}
 
