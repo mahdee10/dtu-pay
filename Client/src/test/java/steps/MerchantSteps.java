@@ -1,6 +1,3 @@
-/**
- * @author Hussein Dirani s223518
- */
 package steps;
 
 import dtu.ws.fastmoney.BankServiceException_Exception;
@@ -19,7 +16,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MerchantRegistration {
+public class MerchantSteps {
     User userMerchant;
     private String accountId;
     private boolean isMerchantUnregistered;
@@ -30,7 +27,9 @@ public class MerchantRegistration {
     private UUID merchantId;
 
 
-
+    /**
+     * @author Hussein Dirani s223518
+     */
     @io.cucumber.java.After
     public void cleanupAccounts() {
         for (String accountId : createdAccountIds) {
@@ -84,6 +83,9 @@ public class MerchantRegistration {
         assertNotNull(merchantId, "merchant ID should not be null");
     }
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     @When("the merchant unregisters")
     public void theMerchantUnregisters() throws Exception {
         isMerchantUnregistered = merchantService.unregisterCustomer(merchantId);

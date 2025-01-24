@@ -39,6 +39,9 @@ public class PaymentSteps {
     private PaymentService paymentService = new PaymentService();
     private TokenService tokenService = new TokenService();
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     @io.cucumber.java.After
     public void cleanupAccounts() throws BankServiceException_Exception {
         for (String accountId : createdAccountIds) {
@@ -158,6 +161,9 @@ public class PaymentSteps {
         assertEquals(expectedBalance, actualBalance);
     }
 
+    /**
+     * @author Mihai Munteanu s242996
+     */
     @Then("the balance of the merchant at the bank is {int} kr")
     public void the_balance_of_the_merchant_at_the_bank_is_kr(Integer balance) throws Throwable {
         BigDecimal expectedBalance = BigDecimal.valueOf(balance).stripTrailingZeros();

@@ -1,0 +1,186 @@
+---
+openapi: 3.1.0
+components:
+  schemas:
+    CreateCustomerDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        cpr:
+          type: string
+        bankAccountId:
+          type: string
+    CreateMerchantDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        cpr:
+          type: string
+        bankAccountId:
+          type: string
+    PaymentRequestDto:
+      type: object
+      properties:
+        customerToken:
+          type: string
+        merchantId:
+          type: string
+        amount:
+          type: number
+          format: double
+    TokenRequestDto:
+      type: object
+      properties:
+        customerId:
+          $ref: "#/components/schemas/UUID"
+        nTokens:
+          type: integer
+          format: int32
+    UUID:
+      type: string
+      format: uuid
+      pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+paths:
+  /customers/deregister/{customerId}:
+    delete:
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Delete Customer
+      tags:
+      - Customer Resource
+  /customers/register:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerDto"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Register Customer
+      tags:
+      - Customer Resource
+  /customers/reports/{customerId}:
+    get:
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get Report
+      tags:
+      - Customer Resource
+  /customers/tokens/create:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequestDto"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Create Tokens
+      tags:
+      - Customer Resource
+  /customers/tokens/{customerId}:
+    get:
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get Tokens
+      tags:
+      - Customer Resource
+  /merchants/deregister/{merchantId}:
+    delete:
+      parameters:
+      - name: merchantId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Delete Merchant
+      tags:
+      - Merchant Resource
+  /merchants/payment:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequestDto"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Payment Request
+      tags:
+      - Merchant Resource
+  /merchants/register:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMerchantDto"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Register Merchant
+      tags:
+      - Merchant Resource
+  /merchants/reports/{merchantId}:
+    get:
+      parameters:
+      - name: merchantId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get Merchant Payments
+      tags:
+      - Merchant Resource
+  /reports:
+    get:
+      responses:
+        "200":
+          description: OK
+      summary: Get Payments
+      tags:
+      - Reporting Resource
+info:
+  title: dtu-pay API
+  version: 1.0.0-SNAPSHOT

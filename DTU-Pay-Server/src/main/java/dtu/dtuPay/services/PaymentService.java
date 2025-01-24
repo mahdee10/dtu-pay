@@ -1,3 +1,6 @@
+/**
+ * @author Ionut Andrici s242956
+ */
 package dtu.dtuPay.services;
 
 import messaging.Event;

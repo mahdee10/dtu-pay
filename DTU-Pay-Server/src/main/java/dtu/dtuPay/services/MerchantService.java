@@ -1,6 +1,3 @@
-/**
- * @author Hussein Dirani s223518
- */
 package dtu.dtuPay.services;
 
 import messaging.Event;
@@ -47,6 +44,9 @@ public class MerchantService {
         queue.addHandler(MERCHANT_ACCOUNT_VALIDATED, this::handleMerchantAccountValidationResponse);
     }
 
+    /**
+     * @author Hussein Dirani s223518
+     */
     public AccountEventMessage createMerchant(CreateMerchantDto merchant) {
         CorrelationId correlationId = CorrelationId.randomId();
         correlations.put(correlationId, new CompletableFuture<>());
@@ -90,6 +90,9 @@ public class MerchantService {
         correlations.get(correlationId).complete(eventMessage);
     }
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     private void handleMerchantAccountValidationResponse(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         AccountEventMessage eventMessage = ev.getArgument(1, AccountEventMessage.class);

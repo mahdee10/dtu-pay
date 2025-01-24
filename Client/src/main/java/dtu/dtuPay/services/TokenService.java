@@ -11,6 +11,9 @@ import dtu.dtuPay.services.interfaces.ITokenService;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * @author Luis Freire s233483
+ */
 public class TokenService {
     ResteasyClient client = (ResteasyClient) ClientBuilder.newClient();
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");

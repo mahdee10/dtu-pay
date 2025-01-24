@@ -21,6 +21,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * @author Mihai Munteanu s242996
+ */
 public class ReportingSteps
 {
     User userCustomer;

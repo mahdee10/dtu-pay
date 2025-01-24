@@ -10,7 +10,9 @@ import dtu.dtuPay.services.interfaces.IReportingService;
 
 import java.util.List;
 import java.util.UUID;
-
+/**
+ * @author Ionut Andrici s242956
+ */
 public class ReportingService {
     ResteasyClient client = (ResteasyClient) ClientBuilder.newClient();
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");

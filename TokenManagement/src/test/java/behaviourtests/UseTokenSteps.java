@@ -1,5 +1,6 @@
 package behaviourtests;
 
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -18,7 +19,9 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import messaging.Event;
 import messaging.MessageQueue;
-
+/**
+ * @author Luis Freire s233483
+ */
 public class UseTokenSteps {
 
     MessageQueue queue = mock(MessageQueue.class);
