@@ -3,11 +3,11 @@ package reporting;
 import io.cucumber.java.en.*;
 import messaging.Event;
 import messaging.MessageQueue;
-import dtu.reporting.models.CorrelationId;
-import dtu.reporting.models.Payment;
-import dtu.reporting.models.PaymentEventMessage;
-import dtu.reporting.models.ReportingEventMessage;
-import dtu.reporting.services.ReportingService;
+import dtu.dtuPay.models.CorrelationId;
+import dtu.dtuPay.models.Payment;
+import dtu.dtuPay.models.PaymentEventMessage;
+import dtu.dtuPay.models.ReportingEventMessage;
+import dtu.dtuPay.services.ReportingService;
 
 import java.util.ArrayList;
 import java.util.List;

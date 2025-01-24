@@ -65,7 +65,7 @@ public class PaymentService {
                     "Money is being transferred"                               // Empty description
             );
         } catch (BankServiceException_Exception e) {
-            eventMessage.setExceptionMessage("Bank payment execution failed.");
+            eventMessage.setExceptionMessage(e.getMessage());
             eventMessage.setRequestResponseCode(BAD_REQUEST);
 
             publishResponse(correlationId, eventMessage);

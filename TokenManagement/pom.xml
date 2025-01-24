@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dk.dtu.hubert</groupId>
+    <groupId>dtu.dtuPay</groupId>
     <artifactId>TokenManagement</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -103,7 +103,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Main-Class>org.example.StartUp</Main-Class>
+                            <Main-Class>dtu.dtuPay.StartUp</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
