@@ -1,3 +1,6 @@
+/**
+ * @author Mahdi El Dirani s233031
+ */
 package dtu.dtuPay.resources;
 
 import jakarta.ws.rs.*;

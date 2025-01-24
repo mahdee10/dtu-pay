@@ -1,3 +1,6 @@
+/**
+ * @author Hussein Dirani s223518
+ */
 package dtu.dtuPay.models;
 
 import java.util.UUID;
