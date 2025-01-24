@@ -7,6 +7,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import dtu.dtuPay.services.interfaces.IPaymentService;
 
+/**
+ * @author Mihai Munteanu s242996
+ */
 public class PaymentService {
     ResteasyClient client = (ResteasyClient) ClientBuilder.newClient();
     ResteasyWebTarget baseURL = client.target("http://localhost:8080");

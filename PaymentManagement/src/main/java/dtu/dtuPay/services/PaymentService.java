@@ -51,7 +51,9 @@ public class PaymentService {
         Event failureEvent = new Event(PAYMENT_COMPLETED, new Object[] { correlationId, paymentEventMessage});
         queue.publish(failureEvent);
     }
-
+    /**
+     * @author Ionut Andrici s242956
+     */
     public void handlePaymentRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         PaymentEventMessage eventMessage = ev.getArgument(1, PaymentEventMessage.class);
@@ -104,6 +106,9 @@ public class PaymentService {
         queue.publish(event);
     }
 
+    /**
+     * @author Mihai Munteanu s242996
+     */
     public void handleGetCustomerPaymentsRequested(Event ev) {
         CorrelationId correlationId = ev.getArgument(0, CorrelationId.class);
         PaymentEventMessage eventMessage = ev.getArgument(1, PaymentEventMessage.class);

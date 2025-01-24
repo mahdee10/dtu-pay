@@ -30,6 +30,9 @@ public class ReportingServiceSteps {
     ReportingEventMessage eventMessage;
     private List<Payment> expectedPaymentList;
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     @Given("a list of payments are present in the payment repository for customer with ID {string}")
     public void aListOfPaymentsArePresentInThePaymentRepositoryForCustomerWithID(String customerIdString) {
         customerId = UUID.fromString(customerIdString);
@@ -42,6 +45,9 @@ public class ReportingServiceSteps {
         aListOfPaymentsArePresentInThePaymentRepository();
     }
 
+    /**
+     * @author Raihanullah Mehran s233837
+     */
     @Given("a list of payments are present in the payment repository")
     public void aListOfPaymentsArePresentInThePaymentRepository() {
         expectedPaymentList = new ArrayList<>(){};

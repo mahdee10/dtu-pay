@@ -11,6 +11,9 @@ import dtu.dtuPay.services.ReportingService;
 public class ReportingResource {
     ReportingService service = ReportingService.getInstance();
 
+    /**
+     * @author Mihai Munteanu s242996
+     */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

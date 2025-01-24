@@ -33,6 +33,9 @@ public class TokenService {
         this.queue.addHandler(USE_TOKEN_REQUESTED, this::handleUseTokenRequest);
     }
 
+    /**
+     * @author Ugne Adamonyte s194705
+     */
     public void handleGetTokensRequested(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);
@@ -54,6 +57,9 @@ public class TokenService {
         queue.publish(event);
     }
 
+    /**
+     * @author Ugne Adamonyte s194705
+     */
     public void handleCreateTokensRequested(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);
@@ -92,6 +98,9 @@ public class TokenService {
         queue.publish(event);
     }
 
+    /**
+     * @author Luis Freire s233483
+     */
     public void handleUseTokenRequest(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         TokenEventMessage eventMessage = e.getArgument(1, TokenEventMessage.class);

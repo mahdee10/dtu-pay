@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-
+/**
+ * @author Luis Freire s233483
+ */
 // Create Repository class with singleton
 public class TokenRepository {
     private static TokenRepository instance;

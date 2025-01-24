@@ -21,7 +21,9 @@ import messaging.MessageQueue;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
+/**
+ * @author Ugne Adamonyte s194705
+ */
 public class GetTokenSteps {
 
     MessageQueue queue = mock(MessageQueue.class);

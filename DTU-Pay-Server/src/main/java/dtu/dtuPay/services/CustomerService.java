@@ -1,6 +1,3 @@
-/**
- * @author Mahdi El Dirani s233031
- */
 package dtu.dtuPay.services;
 
 import messaging.Event;
@@ -40,6 +37,9 @@ public class CustomerService {
         return service;
     }
 
+    /**
+     * @author Mahdi El Dirani s233031
+     */
     public CustomerService(MessageQueue q) {
         queue = q;
         queue.addHandler(CUSTOMER_CREATED, this::handleCustomerCreated);
@@ -90,6 +90,9 @@ public class CustomerService {
         correlations.get(correlationId).complete(eventMessage);
     }
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     private void handleValidateCustomerAccountResponse(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         AccountEventMessage eventMessage = e.getArgument(1, AccountEventMessage.class);

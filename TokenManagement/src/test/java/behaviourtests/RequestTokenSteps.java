@@ -23,7 +23,9 @@ import dtu.dtuPay.models.Token;
 import dtu.dtuPay.models.TokenEventMessage;
 import dtu.dtuPay.repositories.TokenRepository;
 import dtu.dtuPay.services.TokenService;
-
+/**
+ * @author Ugne Adamonyte s194705
+ */
 public class RequestTokenSteps {
 
     MessageQueue queue = mock(MessageQueue.class);

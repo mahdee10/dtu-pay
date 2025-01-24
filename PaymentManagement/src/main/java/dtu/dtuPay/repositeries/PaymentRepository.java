@@ -1,3 +1,6 @@
+/**
+ * @author Mihai Munteanu s242996
+ */
 package dtu.dtuPay.repositeries;
 
 import dtu.dtuPay.models.Payment;

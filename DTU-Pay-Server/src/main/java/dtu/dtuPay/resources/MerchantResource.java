@@ -1,6 +1,3 @@
-/**
- * @author Hussein Dirani s223518
- */
 package dtu.dtuPay.resources;
 
 import jakarta.ws.rs.*;
@@ -25,6 +22,9 @@ public class MerchantResource {
     PaymentService paymentService = PaymentService.getInstance();
     ReportingService reportingService = ReportingService.getInstance();
 
+    /**
+     * @author Hussein Dirani s223518
+     */
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -44,6 +44,9 @@ public class MerchantResource {
                 .build();
     }
 
+    /**
+     * @author Hussein Dirani s223518
+     */
     @DELETE
     @Path("/deregister/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -63,7 +66,10 @@ public class MerchantResource {
                 .build();
 
     }
-    
+
+    /**
+     * @author Mihai Munteanu s242996
+     */
     @GET
     @Path("/reports/{merchantId}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -84,6 +90,9 @@ public class MerchantResource {
                 .build();
     }
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     @POST
     @Path("/payment")
     @Consumes(MediaType.APPLICATION_JSON)

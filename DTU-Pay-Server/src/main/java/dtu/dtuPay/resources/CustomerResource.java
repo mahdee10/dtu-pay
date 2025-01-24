@@ -1,6 +1,4 @@
-/**
- * @author Mahdi El Dirani s233031
- */
+
 package dtu.dtuPay.resources;
 
 import jakarta.ws.rs.*;
@@ -23,6 +21,9 @@ public class CustomerResource {
     ReportingService reportingService = ReportingService.getInstance();
     TokenService tokenService = TokenService.getInstance();
 
+    /**
+     * @author Mahdi El Dirani s233031
+     */
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -41,6 +42,9 @@ public class CustomerResource {
                     .build();
     }
 
+    /**
+     * @author Mahdi El Dirani s233031
+     */
     @DELETE
     @Path("/deregister/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -61,6 +65,9 @@ public class CustomerResource {
 
     }
 
+    /**
+     * @author Mihai Munteanu s242996
+     */
     @GET
     @Path("/reports/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -81,7 +88,9 @@ public class CustomerResource {
                 .build();
     }
 
-
+    /**
+     * @author Ugne Adamonyte s194705
+     */
     @POST
     @Path("/tokens/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -100,6 +109,9 @@ public class CustomerResource {
                 .build();
     }
 
+    /**
+     * @author Ugne Adamonyte s194705
+     */
     @GET
     @Path("/tokens/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)

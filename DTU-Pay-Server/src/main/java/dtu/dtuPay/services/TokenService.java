@@ -1,5 +1,5 @@
 package dtu.dtuPay.services;
-
+/// @author Luis Freire s233483
 import messaging.Event;
 import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;

@@ -34,6 +34,9 @@ public class PaymentSteps {
 
     public PaymentSteps() {}
 
+    /**
+     * @author Ionut Andrici s242956
+     */
     // pay service test
     @When("{string} event to execute a payment is received")
     public void eventToExecuteAPaymentIsReceived(String eventName) throws BankServiceException_Exception {
@@ -118,6 +121,10 @@ public class PaymentSteps {
         assertNotNull(expectedPayment.getId());
     }
 
+
+    /**
+     * @author Mihai Munteanu s242996
+     */
     // getPayments service test
     @Given("a list of payments are present in the payment repository")
     public void aListOfPaymentsArePresentInThePaymentRepository() {

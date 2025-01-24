@@ -1,6 +1,3 @@
-/**
- * @author Mahdi El Dirani s233031
- */
 package steps;
 
 import dtu.dtuPay.dtos.TokenRequestDto;
@@ -21,7 +18,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CustomerRegistration {
+public class CustomerSteps {
     User userCustomer;
     private String accountId;
     private UUID customerId;
@@ -35,6 +32,9 @@ public class CustomerRegistration {
     private TokenService tokenService = new TokenService();
 
 
+    /**
+     * @author Mahdi El Dirani s233031
+     */
     @io.cucumber.java.After
     public void cleanupAccounts() {
         for (String accountId : createdAccountIds) {
@@ -89,6 +89,10 @@ public class CustomerRegistration {
         assertNotNull(customerId, "Customer ID should not be null");
     }
 
+
+    /**
+     * @author Ionut Andrici s242956
+     */
     @When("the customer unregisters")
     public void theCustomerUnregisters() throws Exception {
         isCustomerUnregistered = customerService.unregisterCustomer(customerId);
