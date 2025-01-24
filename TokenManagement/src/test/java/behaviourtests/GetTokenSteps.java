@@ -41,7 +41,7 @@ public class GetTokenSteps {
 	public GetTokenSteps() {
 	}
 	
-	@Given("a registered customer with id {string} with at least {int} token")
+	@Given("a registered customer with id {string} with at least {int} tokens")
 	public void a_registered_customer_with_id_with_at_least_token(String uuid, Integer nToken) {
 		Token token = new Token(tokenUUID, true);
 		ArrayList<Token> tokenList = new ArrayList<>();
