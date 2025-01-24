@@ -65,10 +65,11 @@ public class TokenService {
 
     		if(tokenList.size() <= 1) {
     			List<Token> newTokenList = new ArrayList<>();
-    			for (int i = 0; i < requestedTokens; i++) {
+    			for (int i = 0; i <= requestedTokens; i++) {
     				Token newToken = new Token(UUID.randomUUID(), true);
     				  newTokenList.add(newToken);
-    				}
+                }
+
     			tokenRepository.addTokens(uuid, newTokenList);
                 eventMessage.setRequestResponseCode(OK);
                 eventMessage.setCreatedTokens(newTokenList.size());
