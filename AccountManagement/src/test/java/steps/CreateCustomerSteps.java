@@ -5,12 +5,11 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import messaging.Event;
 import messaging.MessageQueue;
-import models.AccountEventMessage;
-import models.CorrelationId;
-import models.Customer;
-import models.Merchant;
-import repositories.CustomerRepository;
-import services.CustomerService;
+import dtu.dtuPay.models.AccountEventMessage;
+import dtu.dtuPay.models.CorrelationId;
+import dtu.dtuPay.models.Customer;
+import dtu.dtuPay.repositories.CustomerRepository;
+import dtu.dtuPay.services.CustomerService;
 
 import java.util.UUID;
 

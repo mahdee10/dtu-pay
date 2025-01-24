@@ -4,9 +4,9 @@ import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import models.dtos.UserRequestDto;
-import services.BankServiceImplementation;
-import services.CustomerService;
+import dtu.dtuPay.dtos.UserRequestDto;
+import dtu.dtuPay.services.BankServiceImplementation;
+import dtu.dtuPay.services.CustomerService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class CustomerRegistration {
     private boolean isCustomerUnregistered;
     BankServiceImplementation bankService = new BankServiceImplementation();
 
-    private static List<String> createdAccountIds = new ArrayList<>();
+    private List<String> createdAccountIds = new ArrayList<>();
     CustomerService customerService = new CustomerService();
 
 

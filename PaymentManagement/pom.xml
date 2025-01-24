@@ -60,7 +60,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Main-Class>dtu.StartUp</Main-Class>
+                            <Main-Class>dtu.dtuPay.StartUp</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>

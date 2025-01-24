@@ -5,14 +5,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import org.example.models.CorrelationId;
-import org.example.models.Token;
-import org.example.models.TokenEventMessage;
-import org.example.repositories.TokenRepository;
-import org.example.services.TokenService;
+import dtu.dtuPay.models.CorrelationId;
+import dtu.dtuPay.models.Token;
+import dtu.dtuPay.models.TokenEventMessage;
+import dtu.dtuPay.repositories.TokenRepository;
+import dtu.dtuPay.services.TokenService;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -41,24 +40,23 @@ public class UseTokenSteps {
     public UseTokenSteps() {
     }
 
-    @Given("a payment service supplies a token with UUID {string} to pay")
-    public void aPaymentServiceSuppliesATokenWithUUIDToPay(String tokenUUID) {
+    @Given("a payment service supplies {int} valid token with UUID {string} to pay")
+    public void aPaymentServiceSuppliesValidTokenWithUUIDToPay(int nTokens, String tokenUUID) {
         receivedTokenUUID = UUID.fromString(tokenUUID);
-    }
-
-    @Given("the token is valid")
-    public void theTokenIsValid() {
 
         token = new Token(receivedTokenUUID, true);
         tokenList.add(token);
+        assertEquals(nTokens, tokenList.size());
     }
 
-    @Given("the token has been used and is invalid")
-    public void theTokenHasBeenUsedAndIsInvalid() {
+    @Given("a payment service supplies {int} used invalid token with UUID {string} to pay")
+    public void aPaymentServiceSuppliesUsedInvalidTokenWithUUIDToPay(int nTokens, String tokenUUID) {
+        receivedTokenUUID = UUID.fromString(tokenUUID);
+
         token = new Token(receivedTokenUUID, false);
         tokenList.add(token);
+        assertEquals(nTokens, tokenList.size());
     }
-
 
     @Given("a registered DTU pay customer with UUID {string} is associated with the token")
     public void aRegisteredDTUPayCustomerWithUUIDIsAssociatedWithTheToken(String customerUUID) {
@@ -91,10 +89,10 @@ public class UseTokenSteps {
         assertEquals(tokenEventMessage.getTokenUUID(),UUID.fromString(tokenUUID)) ;
     }
 
-
     @Then("a response event {string} is sent and contains an exception {string}")
     public void aResponseEventIsSentAndContainsAnException(String response, String  exceptionMessage) {
         tokenEventMessage.setRequestResponseCode(BAD_REQUEST);
+        tokenEventMessage.setCustomerId(associatedCustomerId);
         tokenEventMessage.setExceptionMessage(exceptionMessage);
         tokenEventMessage.setIsValid(false);
         event = new Event(response, new Object[]{ correlationId, tokenEventMessage});
@@ -106,5 +104,9 @@ public class UseTokenSteps {
         nonExistentTokenUUID = UUID.fromString(tokenUUID);
     }
 
-
+    @Then("the customer has {int} tokens")
+    public void theCustomerHasTokens(int nTokens) {
+        int nTokenActive = tokenRepository.getTokens(associatedCustomerId).size();
+        assertEquals(nTokens, nTokenActive);
+    }
 }

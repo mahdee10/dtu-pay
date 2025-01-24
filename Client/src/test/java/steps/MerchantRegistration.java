@@ -4,9 +4,9 @@ import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import models.dtos.UserRequestDto;
-import services.BankServiceImplementation;
-import services.MerchantService;
+import dtu.dtuPay.dtos.UserRequestDto;
+import dtu.dtuPay.services.BankServiceImplementation;
+import dtu.dtuPay.services.MerchantService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class MerchantRegistration {
     private boolean isMerchantUnregistered;
     BankServiceImplementation bankService = new BankServiceImplementation();
 
-    private static List<String> createdAccountIds = new ArrayList<>();
+    private List<String> createdAccountIds = new ArrayList<>();
     private MerchantService merchantService =new MerchantService();
     private UUID merchantId;
 
@@ -53,6 +53,7 @@ public class MerchantRegistration {
         userMerchant.setLastName(lastName);
         userMerchant.setCprNumber(cpr);
     }
+
     @Then("the merchant is registered with the bank with an initial balance of {double} kr")
     public void the_Merchant_is_registered_with_the_bank_with_an_initial_balance_of_kr(Double balance) throws BankServiceException_Exception {
         try {

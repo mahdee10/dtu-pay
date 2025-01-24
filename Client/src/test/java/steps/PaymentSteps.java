@@ -1,16 +1,15 @@
 package steps;
 
-import dtu.ws.fastmoney.BankServiceException;
+import dtu.dtuPay.services.*;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.User;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import models.dtos.PaymentRequestDto;
-import models.dtos.TokenRequestDto;
-import models.dtos.UserRequestDto;
-import org.junit.jupiter.api.Assertions;
-import services.*;
+import dtu.dtuPay.dtos.PaymentRequestDto;
+import dtu.dtuPay.dtos.TokenRequestDto;
+import dtu.dtuPay.dtos.UserRequestDto;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentSteps {
@@ -33,7 +33,7 @@ public class PaymentSteps {
     private String exceptionMessage;
     BankServiceImplementation bankService = new BankServiceImplementation();
 
-    private static List<String> createdAccountIds = new ArrayList<>();
+    private List<String> createdAccountIds = new ArrayList<>();
     private CustomerService customerService = new CustomerService();
     private MerchantService merchantService = new MerchantService();
     private PaymentService paymentService = new PaymentService();
@@ -72,8 +72,8 @@ public class PaymentSteps {
         createdAccountIds.add(customerBankAccountId);
     }
 
-    @Given("customer is registered with Simple DTU Pay using their bank account")
-    public void customer_is_registered_with_simple_dtu_pay_using_their_bank_account() throws Exception {
+    @Given("customer is registered with DTU Pay using their bank account")
+    public void customer_is_registered_with_dtu_pay_using_their_bank_account() throws Exception {
         UserRequestDto payloadUser = new UserRequestDto();
         payloadUser.setFirstName(userCustomer.getFirstName());
         payloadUser.setLastName(userCustomer.getLastName());
@@ -108,8 +108,8 @@ public class PaymentSteps {
         createdAccountIds.add(merchantBankAccountId);
     }
 
-    @Given("merchant is registered with Simple DTU Pay using their bank account")
-    public void merchant_is_registered_with_simple_dtu_pay_using_their_bank_account() throws Exception {
+    @Given("merchant is registered with DTU Pay using their bank account")
+    public void merchant_is_registered_with_dtu_pay_using_their_bank_account() throws Exception {
         UserRequestDto payloadUser = new UserRequestDto();
         payloadUser.setFirstName(userMerchant.getFirstName());
         payloadUser.setLastName(userMerchant.getLastName());
@@ -126,12 +126,23 @@ public class PaymentSteps {
         assertEquals(nTokensCreated, int1.intValue());
     }
 
+    @Given("merchant is not registered with DTU Pay")
+    public void merchantIsNotRegisteredWithDTUPay() {
+        merchantId = UUID.randomUUID();
+    }
+
     @When("the merchant initiates a payment for {int} kr by using the customer token")
     public void theMerchantInitiatesAPaymentForKrByTheCustomerToken(Integer amount) throws Exception {
         customerToken = tokenService.getTokens(customerId).getFirst();
-        paymentIsSuccessful = paymentService.pay(
-                new PaymentRequestDto(customerToken, merchantId, amount)
-        );
+        try {
+            paymentIsSuccessful = paymentService.pay(
+                    new PaymentRequestDto(customerToken, merchantId, amount)
+            );
+        } catch (Exception e) {
+            paymentIsSuccessful = false;
+            exceptionMessage = e.getMessage();
+        }
+
     }
 
     @Then("the payment is successful")
@@ -168,6 +179,7 @@ public class PaymentSteps {
                     new PaymentRequestDto(customerToken, merchantId, amount)
             );
         } catch (Exception e) {
+            paymentIsSuccessful = false;
             exceptionMessage = e.getMessage();
         }
 
@@ -175,7 +187,13 @@ public class PaymentSteps {
 
     @Then("the payment is unsuccessful and the exception message {string} is returned")
     public void thePaymentIsUnsuccessfulAndTheExceptionMessageIsReturned(String mesasage) {
+        assertFalse(paymentIsSuccessful);
         assertEquals(mesasage, exceptionMessage);
     }
 
+    @And("the customer gets unregistered")
+    public void theCustomerGetsUnregistered() throws Exception
+    {
+        customerService.unregisterCustomer(customerId);
+    }
 }
