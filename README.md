@@ -1,4 +1,4 @@
-#📱 Backend Microservices App – MobilePay-style Platform
+# 📱 Backend Microservices App – MobilePay-style Platform
 This project is a backend service designed as a microservices-based system similar to MobilePay, developed during the Web Services course at DTU in collaboration with my group.
 
 ## Key features:
